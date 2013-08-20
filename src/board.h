@@ -9,6 +9,8 @@
 #define BOARD_H_
 
 #include <list>
+#include <fstream>
+#include <utility>	//for std::pair
 
 class board
 {
@@ -21,26 +23,59 @@ class board
 	//[0] for black, [1] for red
 	int kingCount[2];
 	//[0] for black, [1] for red
+public:
 	board();
 	//use default copy constructor for copying boards
 	//then use makeMove
-public:
-	void listMoves(std::list<move*>&);
+	void modifyBoard(const std::ifstream&); //create a board from an input file
 	void makeMove(const move&);
-	bool isValidMove(const move&);
 	void printBoard();	//expands and prints board
 	void evaluate();	//Evaluation function
-	bool jumpsAvailable();	//checks entire board for jumps
-	bool jumpIsAvailable(point p);	//checks if a jump is available at the point
-	bool moveIsAvailable(int, int);
-	bool movesAvailable(); //don't know if necessary or not
-	bool terminalTest()
+	void deleteMoveslist(std::list<move*>& mlist);
+//do
+	void createMove(std::list<move*>& mlist,const int& xi,const int& yi, int xf, int yf)
 	{
-		if (piecesCount[0] == 0 || piecesCount[1] == 0 || movesAvailable() == false)
+		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
+			mlist.push_back(new move(xi, yi, xf, yf));
+	}
+
+	void checkNeighbors(std::list<move*>&, int&, int&);	//check for move forward and backwards
+	//will do appropriate version for a king
+	bool listMoves(std::list<move*>&); //need to do
+	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
+	void checkJump(std::list<move*>&, int&, int&);
+	//checks if a jump is available at the point
+
+	bool isKing(int& x, int& y)
+	{
+		if (arr[x][y] == toupper(color))
 			return true;
 		return false;
 	}
+	//judges if it's a king for the current color's turn
+
+	void undoMove(move*); //used to reverse a jump
+//end do
+	bool movesAvailable(std::list<move*>& mlist)
+	{
+		if (jumpsAvailable(mlist))
+			return true;
+		if (listMoves(mlist))
+			return true;
+		return false;
+	}
+
+	bool isValidPos(int i, int j)
+	{
+		if (i >= 0 && i < 8 && j >= 0 && j < 8)
+			return true;
+		else return false;
+	}
+
+	bool terminalTest(std::list<move*>&); // test for end, done
+
 	char getTurn() {return color;}
+
 	void changeTurn()
 	{
 		if (color == 'r')
@@ -48,25 +83,27 @@ public:
 		else
 			color = 'r';
 	}
-
 };
 
 class move
 {
 public:
-	point start;
-	point end;
-	bool isJump;
-	std::list<point> jpoints;
-	move(point s, point e): start(s), end(e), isJump(false) {}
+	int xi;
+	int yi;
+	int xf;
+	int yf;
+	std::list<cJumped> jpoints;
+	move(int xs, int ys, int xe, int ye): xi(xs), yi(ys), xf(xe), yf(ye) {}
+	~move();
 };
 
-class point
+class cJumped
 {
 public:
+	char c;
 	int x;
 	int y;
-	point(int i, int j): x(i), y(j) {}
+	cJumped(char p, int xc, int yc): c(p), x(xc), y(yc) {}
 };
 
 
