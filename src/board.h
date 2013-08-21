@@ -11,6 +11,7 @@
 #include <list>
 #include <fstream>
 #include <utility>	//for std::pair
+#include <cctype>
 
 class board
 {
@@ -28,23 +29,46 @@ public:
 	//use default copy constructor for copying boards
 	//then use makeMove
 	void modifyBoard(const std::ifstream&); //create a board from an input file
-	void makeMove(const move&);
+	void makeMove(const move&);	//need to do
 	void printBoard();	//expands and prints board
 	void evaluate();	//Evaluation function
-	void deleteMoveslist(std::list<move*>& mlist);
+	void deleteMoveslist(std::list<move*>& mlist); //check
 //do
 	void createMove(std::list<move*>& mlist,const int& xi,const int& yi, int xf, int yf)
 	{
 		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 			mlist.push_back(new move(xi, yi, xf, yf));
 	}
+	void checkNeighbors(std::list<move*>&, int&, int&);
+	bool jumpConditions(int xj, int yj, int xe, int ye)
+	{
+		if (isValidPos(xj, yj) && isValidPos(xe, ye) && arr[xj][yj] != 'e' &&
+				arr[xj][yj] != color && arr[xe][ye] == 'e' &&  arr[xj][yj] != std::toupper(color))
+			return true;
+		return false;
+	}
+	void board::recurseInc(jump*);
 
-	void checkNeighbors(std::list<move*>&, int&, int&);	//check for move forward and backwards
-	//will do appropriate version for a king
+
+
+
+
+	//check for move forward and backwards
 	bool listMoves(std::list<move*>&); //need to do
+
+
 	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
-	void checkJump(std::list<move*>&, int&, int&);
+	void jumpAvailable(std::list<jump*>&, int, int, jump*);
+
+	void createJump(std::list<jump*>&, int, int, int, int, jump*);
+
 	//checks if a jump is available at the point
+	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
+
+
+
+
+
 
 	bool isKing(int& x, int& y)
 	{
@@ -54,8 +78,12 @@ public:
 	}
 	//judges if it's a king for the current color's turn
 
-	void undoMove(move*); //used to reverse a jump
+	void undoJump(jump* j) //used to reverse a jump
+	{
+		arr[j->x][j->y] = j->c;
+	}
 //end do
+
 	bool movesAvailable(std::list<move*>& mlist)
 	{
 		if (jumpsAvailable(mlist))
@@ -92,18 +120,25 @@ public:
 	int yi;
 	int xf;
 	int yf;
-	std::list<cJumped> jpoints;
+	std::list<jump*> jpoints;
 	move(int xs, int ys, int xe, int ye): xi(xs), yi(ys), xf(xe), yf(ye) {}
 	~move();
 };
 
-class cJumped
+class jump
 {
 public:
+	jump* prev;
+	std::list<jump*> next;	//when next is empty,
+	int numtimes; //number times the jump was utilized (for branching scenarios
+	//when it hits zero, delete it because it's done
 	char c;
-	int x;
+	int x;		//jumped character point
 	int y;
-	cJumped(char p, int xc, int yc): c(p), x(xc), y(yc) {}
+	int xend;	//x endpoint
+	int yend;	//y endpoint
+	jump(char piece, int xc, int yc, int xe, int ye, jump* p):
+		c(piece), x(xc), y(yc), xend(xe), yend(ye), prev(p), numtimes(0) {}
 };
 
 

@@ -9,10 +9,11 @@
 #include <list>
 #include <cctype>
 #include <utility>
+#include <vector>
 
 using std::list;
 using std::toupper;
-using std::pair;
+using std::vector;
 
 board::board(): color('b')
 {
@@ -29,6 +30,15 @@ board::board(): color('b')
 	for (int i = 5; i != 8; ++i)
 		for (int j = 0; j != 3; ++j)
 			arr[i][j] = 'r';
+}
+
+move::~move()
+{
+	while(!jpoints.empty())
+	{
+		delete jpoints.front();
+		jpoints.pop_front();
+	}
 }
 
 void board::deleteMoveslist(list<move*>& mlist)	//deletes all the moves allocated by new in the list
@@ -106,14 +116,23 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)
 	}
 }
 
+//
+//
+//
+
 bool board::jumpsAvailable(list<move*>& mlist)
 {
+	list<jump*> jlist;
 	for (int i = 0; i!= 8; ++i)
 	{
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
-				checkJump(mlist, i, j);
+			{
+				jumpAvailable(jlist, i, j);
+				createJumpMove(mlist, jlist, i, j);
+				//undo jumps here + create moves from jumps
+			}
 		}
 	}
 	if (mlist.empty())
@@ -121,27 +140,121 @@ bool board::jumpsAvailable(list<move*>& mlist)
 	return true;
 }
 
-void board::undoMove(move* m)
+void board::recurseInc(jump* j)	//recursively increment numtimes
 {
-	char c = arr[m->xf][m->yf];
-	if (!(m->jpoints.empty()))
+	++j->numtimes;
+	jump* jp = j;
+	while (j->prev != NULL)
 	{
-		list<cJumped>::iterator it = m->jpoints.begin();
-		while (it != m->jpoints.end())
-		{
-			arr[it->x][it->y] = it->c;
-			++it;
-		}
+		jp = j->prev;
+		++jp->numtimes;
 	}
-	arr[m->xf][m->yf] = 'e';
-	arr[m->xi][m->yi] = c;
 }
 
-void board::checkJump(list<move*>& mlist, int& x, int& y)
+void board::createJump(std::list<jump*>& jlist, int xj, int yj, int xe, int ye, jump* jp)
+{
+	jump* j = new jump(arr[xj][yj], xj, yj, xe, ye, jp);
+	arr[xj][yj] = 'e';	//deletes the character temporarily
+	recurseInc(j);
+	if (jp != NULL)
+		jp->next.push_back(j);
+	jlist.push_front(j);	//pushes the front, iterate from start to end
+	jumpAvailable(jlist, xe, ye, j);
+}
+
+void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i, j are start points
 {
 	if (color == 'b' || arr[x][y] == 'R')
 	{
+		if (x % 2 == 0)	//even x
+		{
+			if (jumpConditions(x+1, y, x+2, y-1))	//checks left down jump
+				createJump(jlist, x+1, y, x+2, y-1, jp);
+			if (jumpConditions(x+1, y+1, x+2, y+1))	//checks right down jump
+				createJump(jlist, x+1, y+1, x+2, y+1, jp);
+		}
+		else	//odd x
+		{
+			if (jumpConditions(x+1, y-1, x+2, y-1))	//checks left down jump
+				createJump(jlist, x+1, y-1, x+2, y-1, jp);
+			if (jumpConditions(x+1, y, x+2, y+1))	//checks right down jump
+				createJump(jlist, x+1, y, x+2, y+1, jp);
+		}
+	}
+	if (color == 'r' || arr[x][y] == 'B')
+	{
+		if (x % 2 == 0)	//even x
+		{
+			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
+				createJump(jlist, x+1, y, x+2, y-1, jp);
+			if (jumpConditions(x-1, y+1, x-2, y+1))	//checks right up jump
+				createJump(jlist, x+1, y+1, x+2, y+1, jp);
+		}
+		else	//odd x
+		{
+			if (jumpConditions(x-1, y-1, x-2, y-1))	//checks left up jump
+				createJump(jlist, x-1, y-1, x-2, y-1, jp);
+			if (jumpConditions(x-1, y, x-2, y+1))	//checks right up jump
+				createJump(jlist, x-1, y, x-2, y+1, jp);
+		}
+	}
+}
 
+void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x, const int& y)
+{
+
+	while (!jlist.empty())
+	{
+		jump* jp = jlist.front();
+		move* m = new move(x, y, -1, -1);
+		while (jp->prev != NULL)
+		{
+			m->jpoints.push_back(jp);	//reverse ordering
+			--jp->numtimes;
+			if (jp->numtimes == 0)
+				jlist.remove(jp);
+			jp = jp->prev;
+		}
+		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
+		{
+			if ((*it)->next.empty())
+			{
+				m->xf = (*it)->xend;
+				m->yf = (*it)->yend;
+			}
+		}
+	}
+}
+/*
+void board::createJump(move* m, int& xi, int& yi, int xj, int yj, int xf, int yf)
+{
+	if (isValidPos(xj, yj) && isValidPos(xf, yf))
+	{
+		char jp = arr[xj][yj];		//jump point's char
+		if (jp != 'e' && jp != color && jp != toupper(color) && arr[xf][yf] == 'e')
+		{
+			m->jpoints.push_back(jump(jp, xj, yj));
+			m->xf = xf;
+			m->yf = yf;
+			xi = xf;
+			yi = yf;
+			arr[xj][yj] = 'e';
+		}
+	}
+}
+
+//need to delete points as we go, create copies
+void board::jumpAvailable(move* m)
+{
+	if (color == 'b' || arr[x][y] == 'R')
+	{
+		if (x % 2 == 0)
+		{
+			if (arr[x+1][y] != 'e' && arr[x+1][y] != color && arr[x+1][y] != toupper(color))
+			{
+
+			}
+		}
 	}
 	if (color == 'r' || arr[x][y] == 'B')
 	{
@@ -149,5 +262,5 @@ void board::checkJump(list<move*>& mlist, int& x, int& y)
 	}
 }
 
-
+*/
 
