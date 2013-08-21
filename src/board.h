@@ -24,22 +24,16 @@ class board
 	//[0] for black, [1] for red
 	int kingCount[2];
 	//[0] for black, [1] for red
-public:
-	board();
-	//use default copy constructor for copying boards
-	//then use makeMove
-	void modifyBoard(const std::ifstream&); //create a board from an input file
-	void makeMove(const move&);	//need to do
-	void printBoard();	//expands and prints board
-	void evaluate();	//Evaluation function
-	void deleteMoveslist(std::list<move*>& mlist); //check
-//do
-	void createMove(std::list<move*>& mlist,const int& xi,const int& yi, int xf, int yf)
-	{
-		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
-			mlist.push_back(new move(xi, yi, xf, yf));
-	}
-	void checkNeighbors(std::list<move*>&, int&, int&);
+
+	//functions for jumps:
+	void createJump(std::list<jump*>&, int, int, int, int, jump*);
+
+	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
+
+	void jumpAvailable(std::list<jump*>&, int, int, jump*);
+
+	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
+
 	bool jumpConditions(int xj, int yj, int xe, int ye)
 	{
 		if (isValidPos(xj, yj) && isValidPos(xe, ye) && arr[xj][yj] != 'e' &&
@@ -47,42 +41,31 @@ public:
 			return true;
 		return false;
 	}
-	void board::recurseInc(jump*);
 
-
-
-
-
-	//check for move forward and backwards
-	bool listMoves(std::list<move*>&); //need to do
-
-
-	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
-	void jumpAvailable(std::list<jump*>&, int, int, jump*);
-
-	void createJump(std::list<jump*>&, int, int, int, int, jump*);
-
-	//checks if a jump is available at the point
-	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
-
-
-
-
-
-
-	bool isKing(int& x, int& y)
-	{
-		if (arr[x][y] == toupper(color))
-			return true;
-		return false;
-	}
-	//judges if it's a king for the current color's turn
+	void recurseInc(jump*);
 
 	void undoJump(jump* j) //used to reverse a jump
 	{
 		arr[j->x][j->y] = j->c;
 	}
-//end do
+
+	//functions for regular moves:
+	void checkNeighbors(std::list<move*>&, int&, int&);
+
+	void createMove(std::list<move*>& mlist,const int& xi,const int& yi, int xf, int yf)
+	{
+		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
+			mlist.push_back(new move(xi, yi, xf, yf));
+	}
+
+	bool isValidPos(int i, int j)
+	{
+		if (i >= 0 && i < 8 && j >= 0 && j < 8)
+			return true;
+		else return false;
+	}
+
+	bool listMoves(std::list<move*>&);
 
 	bool movesAvailable(std::list<move*>& mlist)
 	{
@@ -93,14 +76,43 @@ public:
 		return false;
 	}
 
-	bool isValidPos(int i, int j)
+public:
+
+	board(char c);
+	//use default copy constructor for copying boards
+	//then use makeMove
+
+	bool board::terminalTest(list<move*>& mlist)	//use this in conjunction with color member
+	//like if terminalTest and color = 'b' / 'r'
+	//call terminal test first, movesAvailable will automatically create a list of moves
+	//test for end
 	{
-		if (i >= 0 && i < 8 && j >= 0 && j < 8)
+		if (!movesAvailable(mlist))
 			return true;
-		else return false;
+		if (color == 'b' && piecesCount[0] == 0)
+			return true;
+		if (color == 'r' && piecesCount[1] == 0)
+			return true;
+		return false;
 	}
 
-	bool terminalTest(std::list<move*>&); // test for end, done
+
+	void modifyBoard(const std::ifstream&); //create a board from an input file
+	void makeMove(const move&);	//need to do
+	void printBoard();	//expands and prints board
+	void evaluate();	//Evaluation function
+	void deleteMoveslist(std::list<move*>& mlist); //check
+
+	bool isKing(int& x, int& y)
+	{
+		if (arr[x][y] == toupper(color))
+			return true;
+		return false;
+	}
+	//judges if it's a king for the current color's turn
+
+
+//end do
 
 	char getTurn() {return color;}
 
@@ -128,8 +140,17 @@ public:
 class jump
 {
 public:
-	jump* prev;
-	std::list<jump*> next;	//when next is empty,
+	jump* prev;				//unique previous jump, if it looks repetitive
+	//like in a diamond shape
+	//			4
+	//		3
+	//	2		2'
+	//		1
+	//  1->2'->3->4 is a multiple jump
+	// 	1->2 ->3->4 is another multiple jump
+	// 	3->4 will be created twice, once for each path taken
+	//	they will be exactly the same
+	bool noNext;	//when there are no next moves, noNext is true
 	int numtimes; //number times the jump was utilized (for branching scenarios
 	//when it hits zero, delete it because it's done
 	char c;
@@ -138,7 +159,7 @@ public:
 	int xend;	//x endpoint
 	int yend;	//y endpoint
 	jump(char piece, int xc, int yc, int xe, int ye, jump* p):
-		c(piece), x(xc), y(yc), xend(xe), yend(ye), prev(p), numtimes(0) {}
+		c(piece), x(xc), y(yc), xend(xe), yend(ye), prev(p), numtimes(0), noNext(true) {}
 };
 
 
