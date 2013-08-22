@@ -216,6 +216,29 @@ bool board::listMoves(list<move*>& mlist)	//returns true if there are any regula
 		return false;
 	return true;
 }
+
+//function for printing a character in a different color in windows
+void board::printcolor(const char& c)
+{
+	if (c == 'e')
+		cout << " ";
+	else if (c == 'r' || c == 'R')	//sets piece as red color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
+	else	//c is 'b' or 'B', sets pieces as green color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
+}
 //
 //
 //
@@ -290,9 +313,13 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 		cout << " " << i << " XXX|";
 		for (int j = 0; j != 3; ++j)
 		{
-			cout << " " << arr[i][j] << " |XXX|";
+			cout << " ";
+			printcolor(arr[i][j]);
+			cout << " |XXX|";
 		}
-		cout << " " << arr[i][3] << " " << endl;;
+		cout << " ";
+		printcolor(arr[i][3]);
+		cout << " " << endl;;
 		cout << lineEven;
 	}
 	else
@@ -301,13 +328,18 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 		cout << " " << i << " ";
 		for (int j = 0; j != 3; ++j)
 		{
-			cout << " " << arr[i][j] << " |XXX|";
+			cout << " ";
+			printcolor(arr[i][j]);
+			cout << " |XXX|";
 		}
-		cout << " " << arr[i][3] << " |XXX" << endl;;
+		cout << " ";
+		printcolor(arr[i][3]);
+		cout << " |XXX" << endl;;
 		cout << lineOdd << endl;
 	}
 }
 //need to implement text color change
+//use switch statement
 void board::printBoard()
 {
 	int count = 0;
@@ -335,10 +367,25 @@ void board::printBoard()
 	}
 }
 
+void board::printMoves(const list<move*>& mlist)
+{
+	list<move*>::const_iterator it = mlist.begin();
+	for (; it != mlist.end(); ++it)
+	{
+		cout << "Move: (" << (*it)->xi << ", " << (*it)->yi << ") -> ";
+		if (!(*it)->jpoints.empty())
+		{
+			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
+			for (; iter != (*it)->jpoints.end(); ++iter)
+				cout << "(" << (*iter)->xend << ", " << (*iter)->yend << ") -> ";
+		}
+		cout << "(" << (*it)->xf << ", " << (*it)->yf << endl;
+	}
+}
 //miscellaneous functions for parsing
 inline void remove_carriage_return(string& line)
 //eliminate the \r character in a string
-//this is needed in some cases of getline, such as when I read my input file
+//this is needed in some cases of getline
 {
     if (*line.rbegin() == '\r')
     {

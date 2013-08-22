@@ -10,7 +10,10 @@
 
 #include <cctype>
 #include <fstream>
+#include <iostream>
 #include <list>
+#include <string>
+#include <windows.h>
 
 
 class board
@@ -76,7 +79,20 @@ class board
 		return false;
 	}
 
-	void printline(const int&, const string&, const string&);
+	//functions for printing lines and color characters in windows
+	void printcolor(const char&);
+	//change text color
+	//found at http://msdn.microsoft.com/en-us/library/ms682088(VS.85).aspx#_win32_character_attributes
+	//code for changing color found at http://www.cplusplus.com/forum/beginner/1640/
+
+	WORD GetConsoleTextAttribute (HANDLE hCon)
+	{
+	  CONSOLE_SCREEN_BUFFER_INFO con_info;
+	  GetConsoleScreenBufferInfo(hCon, &con_info);
+	  return con_info.wAttributes;
+	}
+
+	void printline(const int&, const std::string&, const std::string&);
 
 public:
 
@@ -101,7 +117,8 @@ public:
 	void makeMove(move*);	//need to do
 	void modifyBoard(std::ifstream&); //create a board from an input file
 	void printBoard();	//expands and prints board
-	void evaluate();	//Evaluation function
+	void printMoves(const std::list<move*>&);
+	void evaluate();	//Evaluation function, need to do
 	void deleteMoveslist(std::list<move*>& mlist); //check
 
 	bool isKing(int& x, int& y)
@@ -111,7 +128,6 @@ public:
 		return false;
 	}
 	//judges if it's a king for the current color's turn
-
 
 //end do
 
