@@ -27,15 +27,20 @@ class board
 	//[0] for black, [1] for red
 	int kingCount[2];
 	//[0] for black, [1] for red
+	static bool isComputer[2];
+	//[0] for black, [1] for red
+
+	std::list<move*> mlist;
+	//list of all the moves available
 
 	//functions for jumps:
 	void createJump(std::list<jump*>&, int, int, int, int, jump*);
 
-	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
+	void createJumpMove(std::list<jump*>&, const int&, const int&);
 
 	void jumpAvailable(std::list<jump*>&, int, int, jump*);
 
-	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
+	bool jumpsAvailable();	//checks entire board for jumps and list them if there are any
 
 	bool jumpConditions(int xj, int yj, int xe, int ye)
 	{
@@ -53,12 +58,20 @@ class board
 	}
 
 	//functions for regular moves:
-	void checkNeighbors(std::list<move*>&, int&, int&);
+	void checkNeighbors(int&, int&);
 
-	void createMove(std::list<move*>& mlist,const int& xi,const int& yi, int xf, int yf)
+	void createMove(const int& xi,const int& yi, int xf, int yf)
 	{
 		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 			mlist.push_back(new move(xi, yi, xf, yf));
+	}
+
+	void handleKinging(const int& x, const int& y)
+	{
+		if (x == 0 && arr[x][y] == 'r')
+			arr[x][y] = 'R';
+		if (x == 7 && arr[x][y] == 'b')
+			arr[x][y] = 'B';
 	}
 
 	bool isValidPos(int i, int j)
@@ -68,16 +81,27 @@ class board
 		else return false;
 	}
 
-	bool listMoves(std::list<move*>&);
+	bool listMoves();
 
-	bool movesAvailable(std::list<move*>& mlist)
+	bool movesAvailable()
 	{
-		if (jumpsAvailable(mlist))
+		if (jumpsAvailable())
 			return true;
-		if (listMoves(mlist))
+		if (listMoves())
 			return true;
 		return false;
 	}
+
+	void modifyBoard(std::ifstream&); //create a board from an input file
+
+	void convert(const int&, const int&, std::string&);
+	//converts an int to character form appends it to command list for a move
+
+	void convertCommand(const std::string&); //converts command and prints it
+
+	void inputCommand();	//prints out directions  + available moves
+
+	void printMoves(); //prints moves in order listed in the list
 
 	//functions for printing lines and color characters in windows
 	void printcolor(const char&);
@@ -94,18 +118,21 @@ class board
 
 	void printline(const int&, const std::string&, const std::string&);
 
+	static void whoComputer(); //modifies who is a computer, called by startup
+
 public:
 
 	board(char c);
 	//use default copy constructor for copying boards
 	//then use makeMove
+	~board();
 
-	bool board::terminalTest(list<move*>& mlist)	//use this in conjunction with color member
+	bool board::terminalTest()	//use this in conjunction with color member
 	//like if terminalTest and color = 'b' / 'r'
 	//call terminal test first, movesAvailable will automatically create a list of moves
 	//test for end
 	{
-		if (!movesAvailable(mlist))
+		if (!movesAvailable())
 			return true;
 		if (color == 'b' && piecesCount[0] == 0)
 			return true;
@@ -114,22 +141,17 @@ public:
 		return false;
 	}
 
-	void makeMove(move*);	//need to do
-	void modifyBoard(std::ifstream&); //create a board from an input file
-	void printBoard();	//expands and prints board
-	void printMoves(const std::list<move*>&);
-	void evaluate();	//Evaluation function, need to do
-	void deleteMoveslist(std::list<move*>& mlist); //check
-
-	bool isKing(int& x, int& y)
+	void printEBoard() //prints everything necessary, calls printBoard and inputCommand
 	{
-		if (arr[x][y] == toupper(color))
-			return true;
-		return false;
+		printBoard();
+		inputCommand();
 	}
-	//judges if it's a king for the current color's turn
 
-//end do
+	void makeMove(move*);
+	void printBoard();	//expands and prints board
+	void evaluate();	//Evaluation function, need to do
+	void startup();		//determines whether or not players will be a computer calls modifyBoard
+	//NEED TO IMPLEMENT TIMER STUFF
 
 	char getTurn() {return color;}
 
@@ -149,6 +171,7 @@ public:
 	int yi;
 	int xf;
 	int yf;
+	std::string command;	//command used to map a string to the move
 	std::list<jump*> jpoints;
 	move(int xs, int ys, int xe, int ye): xi(xs), yi(ys), xf(xe), yf(ye) {}
 	~move();

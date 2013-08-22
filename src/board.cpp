@@ -15,6 +15,7 @@
 #include <sstream>
 #include <windows.h>
 
+using std::cin;
 using std::cout;
 using std::endl;
 using std::getline;
@@ -42,6 +43,15 @@ board::board(char c = 'b'): color(c)
 			arr[i][j] = 'r';
 }
 
+board::~board()		//deletes all the moves allocated by new in the list
+{
+	while (!mlist.empty())
+	{
+		delete mlist.front();
+		mlist.pop_front();
+	}
+}
+
 move::~move()
 {
 	while(!jpoints.empty())
@@ -59,11 +69,11 @@ void board::createJump(std::list<jump*>& jlist, int xj, int yj, int xe, int ye, 
 	recurseInc(j);
 	if (jp != NULL)
 		jp->noNext = false;
-	jlist.push_front(j);	//pushes the front, iterate from start to end
+	jlist.push_front(j);	//pushes the front, iterate from start to end, last jump is in front
 	jumpAvailable(jlist, xe, ye, j);
 }
 
-void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x, const int& y)
+void board::createJumpMove(list<jump*>& jlist, const int& x, const int& y)
 {
 	while (!jlist.empty())
 	{
@@ -71,14 +81,16 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 		move* m = new move(x, y, -1, -1);
 		while (jp->prev != NULL)
 		{
-			m->jpoints.push_back(jp);	//reverse ordering
+			m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
 			--jp->numtimes;
 			if (jp->numtimes == 0)
 				jlist.remove(jp);
 			jp = jp->prev;
 		}
+		convert(x, y, m->command);
 		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
 		{
+			convert((*it)->xend, (*it)->yend, m->command);
 			undoJump(*it);	//undoes each jump, replaces the 'e's with original characters
 			if ((*it)->noNext)	//if there's no next move for the jump
 			{
@@ -87,7 +99,10 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 			}
 		}
 		if(m->xf != -1 && m->yf != -1)
+		{
 			mlist.push_back(m);
+			m->command += "-1";
+		}
 		else
 		{
 			assert(m->jpoints.empty());
@@ -135,7 +150,7 @@ void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i,
 	}
 }
 
-bool board::jumpsAvailable(list<move*>& mlist)
+bool board::jumpsAvailable()
 {
 	list<jump*> jlist;
 	for (int i = 0; i!= 8; ++i)
@@ -145,7 +160,7 @@ bool board::jumpsAvailable(list<move*>& mlist)
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
 				jumpAvailable(jlist, i, j);
-				createJumpMove(mlist, jlist, i, j);
+				createJumpMove(jlist, i, j);
 			}
 		}
 	}
@@ -165,7 +180,7 @@ void board::recurseInc(jump* j)	//recursively increment numtimes
 	}
 }
 
-void board::checkNeighbors(list<move*>& mlist, int& x, int& y)
+void board::checkNeighbors(int& x, int& y)
 {
 	if (color == 'b' || arr[x][y] == 'R')
 	{
@@ -175,13 +190,13 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)
 		//if it's a king (on appropriate turn), check backwards too
 		if (x % 2 == 0)
 		{
-			createMove(mlist, x, y, x+1, y);
-			createMove(mlist, x, y, x+1, y+1);
+			createMove(x, y, x+1, y);
+			createMove(x, y, x+1, y+1);
 		}
 		else
 		{
-			createMove(mlist, x, y, x+1, y);
-			createMove(mlist, x, y, x+1, y-1);
+			createMove(x, y, x+1, y);
+			createMove(x, y, x+1, y-1);
 		}
 	}
 	if (color == 'r' || arr[x][y] == 'B')
@@ -191,93 +206,30 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)
 		//will always subtract x coordinate
 		if (x % 2 == 0)
 		{
-			createMove(mlist, x, y, x-1, y);
-			createMove(mlist, x, y, x-1, y+1);
+			createMove(x, y, x-1, y);
+			createMove(x, y, x-1, y+1);
 		}
 		else
 		{
-			createMove(mlist, x, y, x-1, y);
-			createMove(mlist, x, y, x-1, y-1);
+			createMove(x, y, x-1, y);
+			createMove(x, y, x-1, y-1);
 		}
 	}
 }
 
-bool board::listMoves(list<move*>& mlist)	//returns true if there are any regular moves
+bool board::listMoves()	//returns true if there are any regular moves
 {
 	for (int i = 0; i!= 8; ++i)
 	{
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
-				checkNeighbors(mlist, i, j);
+				checkNeighbors(i, j);
 		}
 	}
 	if (mlist.empty())
 		return false;
 	return true;
-}
-
-//function for printing a character in a different color in windows
-void board::printcolor(const char& c)
-{
-	if (c == 'e')
-		cout << " ";
-	else if (c == 'r' || c == 'R')	//sets piece as red color
-	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
-		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
-	}
-	else	//c is 'b' or 'B', sets pieces as green color
-	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
-	}
-}
-//
-//
-//
-//public member functions:
-void board::deleteMoveslist(list<move*>& mlist)	//deletes all the moves allocated by new in the list
-{
-	while (!mlist.empty())
-	{
-		delete mlist.front();
-		mlist.pop_front();
-	}
-}
-
-void board::makeMove(move* m)
-{
-	if (!m->jpoints.empty())
-	{
-		list<jump*>::iterator it = m->jpoints.begin();
-		for (; it != m->jpoints.end(); ++it)
-		{
-			arr[(*it)->x][(*it)->y] = 'e';
-			if ((*it)->c == 'r')
-				--piecesCount[1];
-			else if ((*it)->c == 'b')
-				--piecesCount[0];
-			else if ((*it)->c == 'R')
-			{
-				--piecesCount[1];
-				--kingCount[1];
-			}
-			else	//(*it)->c == 'B'
-			{
-				--piecesCount[0];
-				--kingCount[0];
-			}
-		}
-	}
-	arr[m->xf][m->yf] = arr[m->xi][m->yi];	//move the piece
-	arr[m->xi][m->yi] = 'e';				//replace original position with 'e' (for empty)
 }
 
 void board::modifyBoard(ifstream& fin)
@@ -303,6 +255,117 @@ void board::modifyBoard(ifstream& fin)
 	stringstream ss(line);
 	ss >> color;
 	assert(color == 'b' || color == 'r');
+}
+
+//functions for outputting commands
+void board::convert(const int& x, const int& y, string& s)	//converts an int to character form and returns it
+{
+	assert(0 <= x && x <= 7 && 0 <= y && y <= 3);
+	if( 0 <= x && x <= 7 && 0 <= y && y <= 3)
+	{
+		 char c1 = '0' + x;
+		 char c2;
+		 if (x % 2 == 0)
+		 {
+			 c2 = '0' + (2*y + 1);
+		 }
+		 else
+		 {
+			 c2 = '0' + (2*y);
+		 }
+		 s += c1;
+		 s += ' ';
+		 s += c2;
+		 s += ' ';
+	}
+}
+
+void board::convertCommand(const string& s)
+{
+	string::const_iterator it = s.begin();
+	cout << "(" << (*it) << ", ";
+	it += 2;
+	cout << (*it) << ") ";
+	it += 2;
+	while (*it != '-')
+	{
+		cout << "-> (" << (*it) << ", ";
+		it += 2;
+		cout << (*it) << ") ";
+		it += 2;
+	}
+}
+
+void board::inputCommand()		//need to modify this for computer
+{
+	string m;
+	cout << endl;
+	if (color == 'b')
+		cout << "Player 1 to move." << endl;
+	else cout << "Player 2 to move." << endl;
+	cout << "The legal moves are:" << endl;
+	printMoves();
+	cout << endl;
+	//edit below here, test if it's a computer, if it isn't run the below lines
+	//else run something else
+	cout << "Enter a sequence of integers indicating a move." << endl;
+	cout << "Each set of two integers represents a position." << endl;
+	cout << "End the sequence with -1." << endl;
+	cout << "For example: " << (mlist.front())->command << " represents " <<
+			convertCommand(mlist.front()->command) << endl;
+	cout << "Enter move: ";
+	cin >> m;
+	assert(*m.rbegin() != '\r');
+	list<move*>::iterator it = mlist.begin();
+	while (m != (*it)->command)
+	{
+		++it;
+		if (it == mlist.end())
+		{
+			cin >> m;
+			assert(*m.rbegin() != '\r');
+			it = mlist.begin();
+		}
+	}
+	makeMove(*it);
+}
+
+void board::printMoves()
+{
+	list<move*>::const_iterator it = mlist.begin();
+	for (; it != mlist.end(); ++it)
+	{
+		cout << "Move: (" << (*it)->xi << ", " << (*it)->yi << ") -> ";
+		if (!(*it)->jpoints.empty())
+		{
+			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
+			for (; iter != (*it)->jpoints.end(); ++iter)
+				cout << "(" << (*iter)->xend << ", " << (*iter)->yend << ") -> ";
+		}
+		cout << "(" << (*it)->xf << ", " << (*it)->yf << ")" << endl;
+	}
+}
+//function for printing a character in a different color in windows
+void board::printcolor(const char& c)
+{
+	if (c == 'e')
+		cout << " ";
+	else if (c == 'r' || c == 'R')	//sets piece as red color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
+	else	//c is 'b' or 'B', sets pieces as green color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
 }
 
 void board::printline(const int& i, const string& lineEven, const string& lineOdd)
@@ -338,10 +401,71 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 		cout << lineOdd << endl;
 	}
 }
-//need to implement text color change
-//use switch statement
+
+void board::whoComputer()
+{
+	char c = ' ';
+	while (tolower(c) != 'y' || tolower(c) != 'n')
+	{
+		cout << "Will player # 1 be a computer? (Y/N):" << endl;
+		cin >> c;
+	}
+	if (tolower(c) == 'y')
+		board::isComputer[0] = true;
+	else board::isComputer[0] = false;
+	c = ' ';
+	while (tolower(c) != 'y' || tolower(c) != 'n')
+	{
+		cout << "Will player # 2 be a computer? (Y/N):" << endl;
+		cin >> c;
+	}
+	if (tolower(c) == 'y')
+		board::isComputer[1] = true;
+	else board::isComputer[1] = false;
+}
+
+//
+//
+//
+//public member functions:
+
+void board::makeMove(move* m)
+{
+	if (!m->jpoints.empty())
+	{
+		list<jump*>::iterator it = m->jpoints.begin();
+		for (; it != m->jpoints.end(); ++it)
+		{
+			arr[(*it)->x][(*it)->y] = 'e';
+			if ((*it)->c == 'r')
+				--piecesCount[1];
+			else if ((*it)->c == 'b')
+				--piecesCount[0];
+			else if ((*it)->c == 'R')
+			{
+				--piecesCount[1];
+				--kingCount[1];
+			}
+			else	//(*it)->c == 'B'
+			{
+				--piecesCount[0];
+				--kingCount[0];
+			}
+		}
+	}
+	arr[m->xf][m->yf] = arr[m->xi][m->yi];	//move the piece
+	arr[m->xi][m->yi] = 'e';				//replace original position with 'e' (for empty)
+	handleKinging(m->xf, m->yf);
+}
+
 void board::printBoard()
 {
+	cout << "Current board:" << endl;
+	cout << endl;
+	cout << "Player 1 is " << printcolor('b') << " (normal piece) and " << printcolor('B') <<
+			" (king)" << endl;
+	cout << "Player 2 is " << printcolor('r') << " (normal piece) and " << printcolor('R') <<
+			" (king)" << endl;
 	int count = 0;
 	cout << "    " << count;
 	while (count != 8)
@@ -367,19 +491,27 @@ void board::printBoard()
 	}
 }
 
-void board::printMoves(const list<move*>& mlist)
+void board::startup()		//determines whether or not players will be a computer calls modifyBoard
 {
-	list<move*>::const_iterator it = mlist.begin();
-	for (; it != mlist.end(); ++it)
+	board::whoComputer();
+	char c = ' ';
+	while (tolower(c) != 'y' || tolower(c) != 'n')
 	{
-		cout << "Move: (" << (*it)->xi << ", " << (*it)->yi << ") -> ";
-		if (!(*it)->jpoints.empty())
-		{
-			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
-			for (; iter != (*it)->jpoints.end(); ++iter)
-				cout << "(" << (*iter)->xend << ", " << (*iter)->yend << ") -> ";
-		}
-		cout << "(" << (*it)->xf << ", " << (*it)->yf << endl;
+		cout << "Do you want to load a game from a file? (Y/N):" << endl;
+		cin >> c;
+	}
+	if (tolower(c) == 'y')
+	{
+		string name;
+		cout << "Enter filename: " << endl;
+		cin >> name;
+		ifstream fin(name.c_str());
+		assert(fin.good());
+		modifyBoard(fin);
+	}
+	if (board::isComputer[0] == true || board::isComputer[1] == true)
+	{
+		//implement timer stuff
 	}
 }
 //miscellaneous functions for parsing
