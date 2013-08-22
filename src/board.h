@@ -8,10 +8,10 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-#include <list>
-#include <fstream>
-#include <utility>	//for std::pair
 #include <cctype>
+#include <fstream>
+#include <list>
+
 
 class board
 {
@@ -76,6 +76,8 @@ class board
 		return false;
 	}
 
+	void printline(const int&, const string&, const string&);
+
 public:
 
 	board(char c);
@@ -96,9 +98,8 @@ public:
 		return false;
 	}
 
-
-	void modifyBoard(const std::ifstream&); //create a board from an input file
-	void makeMove(const move&);	//need to do
+	void makeMove(move*);	//need to do
+	void modifyBoard(std::ifstream&); //create a board from an input file
 	void printBoard();	//expands and prints board
 	void evaluate();	//Evaluation function
 	void deleteMoveslist(std::list<move*>& mlist); //check

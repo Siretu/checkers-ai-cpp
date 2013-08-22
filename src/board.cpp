@@ -5,16 +5,24 @@
  *      Author: Harrison
  */
 //#define NDEBUG
-#include "board.h"
-#include <list>
-#include <cctype>
-#include <utility>
-#include <vector>
 #include <assert.h>
+#include "board.h"
+#include <cctype>
+#include <fstream>
+#include <iostream>
+#include <list>
+#include <string>
+#include <sstream>
+#include <windows.h>
 
+using std::cout;
+using std::endl;
+using std::getline;
+using std::ifstream;
 using std::list;
+using std::string;
+using std::stringstream;
 using std::toupper;
-using std::vector;
 
 //public constructors
 board::board(char c = 'b'): color(c)
@@ -82,7 +90,7 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 			mlist.push_back(m);
 		else
 		{
-			assert(m->xf == -1 && m->yf == -1);
+			assert(m->jpoints.empty());
 			delete m;
 		}
 	}
@@ -208,7 +216,9 @@ bool board::listMoves(list<move*>& mlist)	//returns true if there are any regula
 		return false;
 	return true;
 }
-
+//
+//
+//
 //public member functions:
 void board::deleteMoveslist(list<move*>& mlist)	//deletes all the moves allocated by new in the list
 {
@@ -217,4 +227,121 @@ void board::deleteMoveslist(list<move*>& mlist)	//deletes all the moves allocate
 		delete mlist.front();
 		mlist.pop_front();
 	}
+}
+
+void board::makeMove(move* m)
+{
+	if (!m->jpoints.empty())
+	{
+		list<jump*>::iterator it = m->jpoints.begin();
+		for (; it != m->jpoints.end(); ++it)
+		{
+			arr[(*it)->x][(*it)->y] = 'e';
+			if ((*it)->c == 'r')
+				--piecesCount[1];
+			else if ((*it)->c == 'b')
+				--piecesCount[0];
+			else if ((*it)->c == 'R')
+			{
+				--piecesCount[1];
+				--kingCount[1];
+			}
+			else	//(*it)->c == 'B'
+			{
+				--piecesCount[0];
+				--kingCount[0];
+			}
+		}
+	}
+	arr[m->xf][m->yf] = arr[m->xi][m->yi];	//move the piece
+	arr[m->xi][m->yi] = 'e';				//replace original position with 'e' (for empty)
+}
+
+void board::modifyBoard(ifstream& fin)
+{
+	//store it all in a list
+	//parse each line
+	//modify the board per line
+	//last line (9th line will be turn)
+	//a sample line of input would be
+	//e b b e
+	string line;
+	int count = 0;
+	while (getline(fin, line) && count != 8)
+	{
+		remove_carriage_return(line);
+		stringstream ss(line);
+		for (int jIndex = 0; jIndex != 4; ++jIndex)
+			ss >> arr[count][jIndex];
+		++count;
+	}
+	getline(fin, line);
+	remove_carriage_return(line);
+	stringstream ss(line);
+	ss >> color;
+	assert(color == 'b' || color == 'r');
+}
+
+void board::printline(const int& i, const string& lineEven, const string& lineOdd)
+{
+	if (i % 2 == 0)
+	{
+		cout << lineEven << endl;
+		cout << " " << i << " XXX|";
+		for (int j = 0; j != 3; ++j)
+		{
+			cout << " " << arr[i][j] << " |XXX|";
+		}
+		cout << " " << arr[i][3] << " " << endl;;
+		cout << lineEven;
+	}
+	else
+	{
+		cout << lineOdd << endl;
+		cout << " " << i << " ";
+		for (int j = 0; j != 3; ++j)
+		{
+			cout << " " << arr[i][j] << " |XXX|";
+		}
+		cout << " " << arr[i][3] << " |XXX" << endl;;
+		cout << lineOdd << endl;
+	}
+}
+//need to implement text color change
+void board::printBoard()
+{
+	int count = 0;
+	cout << "    " << count;
+	while (count != 8)
+	{
+		cout << "   " << ++count;
+	}
+	cout << " " << endl;
+	//padded 4 spaces in front
+	//then first number
+	//then 3 spaces
+	//last number is followed by 1 space and end line
+	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";
+	//padded 3 spaces
+	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";
+	//padded 6 spaces
+	string linebreak = "   -------------------------------";
+	//padded 3 spaces
+	for (int i = 0; i != 8; ++i)
+	{
+		printline(i, lineEven, lineOdd);
+		if (i != 7)
+			cout << linebreak << endl;
+	}
+}
+
+//miscellaneous functions for parsing
+inline void remove_carriage_return(string& line)
+//eliminate the \r character in a string
+//this is needed in some cases of getline, such as when I read my input file
+{
+    if (*line.rbegin() == '\r')
+    {
+        line.erase(line.length() - 1);
+    }
 }
