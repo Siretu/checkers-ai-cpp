@@ -12,15 +12,19 @@
 #include <string>
 #include <windows.h>
 
+using std::endl;
 using std::cin;
 using std::cout;
+using std::getline;
 using std::endl;
 using std::list;
 using std::string;
 
-void board::convert(const int& x, const int& y, string& s)	//converts an int to character form and returns it
+void board::convert(const int& x, const int& y, string& s)
+//converts an int to character form and returns it
+//works fine
 {
-	assert(0 <= x && x <= 7 && 0 <= y && y <= 3);
+	//assert(0 <= x && x <= 7 && 0 <= y && y <= 3);
 	if( 0 <= x && x <= 7 && 0 <= y && y <= 3)
 	{
 		 char c1 = '0' + x;
@@ -40,8 +44,25 @@ void board::convert(const int& x, const int& y, string& s)	//converts an int to 
 	}
 }
 
+//used for computer's move and for selected move, to print out move
+void board::convertCommand(const string& s)
+{
+	string::const_iterator it = s.begin();
+	cout << "(" << (*it) << ", ";
+	it += 2;
+	cout << (*it) << ") ";
+	it += 2;
+	while (*it != '-')
+	{
+		cout << "-> (" << (*it) << ", ";
+		it += 2;
+		cout << (*it) << ") ";
+		it += 2;
+	}
+}
+
 //functions for outputting commands
-void board::inputCommand()		//need to modify this for computer
+void board::inputCommand(list<move*>& mlist)		//need to modify this for computer, PROBLEM!!!!!!!!!
 {
 	string m;
 	//edit below here, test if it's a computer, if it isn't run the below lines
@@ -52,35 +73,44 @@ void board::inputCommand()		//need to modify this for computer
 	cout << "For example: 2 3 3 2 -1" << endl;
 	cout <<	"	represents (2,3) -> (3,2)" << endl;
 	cout << "Enter move: ";
-	cin >> m;
-	assert(*m.rbegin() != '\r');
+	getline(cin, m);
+	remove_carriage_return(m);
+	assert(*m.rbegin() != '\0');
 	list<move*>::iterator it = mlist.begin();
-	while (m != (*it)->command)
+	while (it != mlist.end())
 	{
+		if ((*it)->command == m)
+		{
+			cout << "You have chosen the move: ";
+			convertCommand((*it)->command);
+			cout << endl;
+			break;
+		}
 		++it;
 		if (it == mlist.end())
 		{
-			cin >> m;
-			assert(*m.rbegin() != '\r');
+			getline(cin, m);
+			remove_carriage_return(m);
+			assert(*m.rbegin() != '\0');
 			it = mlist.begin();
 		}
 	}
 	makeMove(*it);
 }
 
-void board::printMoves()
+void board::printMoves(list<move*>& mlist)	//works fine
 {
 	list<move*>::const_iterator it = mlist.begin();
 	for (; it != mlist.end(); ++it)
 	{
-		cout << "Move: (" << (*it)->xi << ", " << (*it)->yi << ") -> ";
+		cout << "Move: (" << (*it)->xi << ", " << convertY((*it)->xi, (*it)->yi) << ") -> ";
 		if (!(*it)->jpoints.empty())
 		{
 			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
 			for (; iter != (*it)->jpoints.end(); ++iter)
-				cout << "(" << (*iter)->xend << ", " << (*iter)->yend << ") -> ";
+				cout << "(" << (*iter)->xend << ", " << convertY((*iter)->xend, (*iter)->yend) << ") -> ";
 		}
-		cout << "(" << (*it)->xf << ", " << (*it)->yf << ")" << endl;
+		cout << "(" << (*it)->xf << ", " << convertY((*it)->xf, (*it)->yf) << ")" << endl;
 	}
 }
 
@@ -88,7 +118,7 @@ void board::printMoves()
 void board::printcolor(const char& c)
 {
 	if (c == 'e')
-		cout << " ";
+		cout << ' ';
 	else if (c == 'r' || c == 'R')	//sets piece as red color
 	{
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -122,7 +152,7 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 		cout << " ";
 		printcolor(arr[i][3]);
 		cout << " " << endl;;
-		cout << lineEven;
+		cout << lineEven << endl;
 	}
 	else
 	{
@@ -141,7 +171,7 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 	}
 }
 
-void board::whoComputer()
+/*void board::whoComputer()
 {
 	char c = ' ';
 	while (tolower(c) != 'y' || tolower(c) != 'n')
@@ -161,5 +191,5 @@ void board::whoComputer()
 	if (tolower(c) == 'y')
 		board::isComputer[1] = true;
 	else board::isComputer[1] = false;
-}
+}*/
 

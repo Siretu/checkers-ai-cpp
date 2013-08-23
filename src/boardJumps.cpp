@@ -15,7 +15,7 @@ using std::toupper;
 
 //private member functions
 //functions for jumps
-void board::createJump(std::list<jump*>& jlist, int xj, int yj, int xe, int ye, jump* jp)
+void board::createJump(list<jump*>& jlist, int xj, int yj, int xe, int ye, jump* jp)
 {
 	jump* j = new jump(arr[xj][yj], xj, yj, xe, ye, jp);
 	arr[xj][yj] = 'e';	//deletes the character temporarily
@@ -26,7 +26,7 @@ void board::createJump(std::list<jump*>& jlist, int xj, int yj, int xe, int ye, 
 	jumpAvailable(jlist, xe, ye, j);
 }
 
-void board::createJumpMove(list<jump*>& jlist, const int& x, const int& y)
+void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x, const int& y)
 {
 	while (!jlist.empty())
 	{
@@ -103,8 +103,13 @@ void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i,
 	}
 }
 
-bool board::jumpsAvailable()
+bool board::jumpsAvailable(list<move*>& mlist)
 {
+	while (!mlist.empty())
+	{
+		delete mlist.front();
+		mlist.pop_front();
+	}
 	list<jump*> jlist;
 	for (int i = 0; i!= 8; ++i)
 	{
@@ -113,7 +118,7 @@ bool board::jumpsAvailable()
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
 				jumpAvailable(jlist, i, j);
-				createJumpMove(jlist, i, j);
+				createJumpMove(mlist, jlist, i, j);
 			}
 		}
 	}

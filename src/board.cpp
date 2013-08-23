@@ -26,23 +26,14 @@ board::board(): color('b'), gameOver(false)
 	kingCount[0] = 0;
 	kingCount[1] = 0;
 	for (int i = 0; i != 3; ++i)
-		for (int j = 0; j != 3; ++j)
+		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'b';
 	for (int i = 3; i != 5; ++i)
-		for (int j = 0; j != 3; ++j)
+		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'e';
 	for (int i = 5; i != 8; ++i)
-		for (int j = 0; j != 3; ++j)
+		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'r';
-}
-
-board::~board()		//deletes all the moves allocated by new in the list
-{
-	while (!mlist.empty())
-	{
-		delete mlist.front();
-		mlist.pop_front();
-	}
 }
 
 move::~move()

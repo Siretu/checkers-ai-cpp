@@ -25,9 +25,9 @@ using std::tolower;
 //
 //
 //public member functions:
-void board::printEBoard()
+void board::printEBoard(list<move*>& mlist)	//seems to work well
 {
-	printBoard();
+	printBoard(mlist);
 	if (gameOver)
 	{
 		cout << "The game is over." << endl;
@@ -39,7 +39,7 @@ void board::printEBoard()
 		//cout << "Do you want to play again? (Y/N):" << endl
 		//cin
 	}
-	else if ((color == 'b' && board::isComputer[0]) || (color == 'r' && board::isComputer[1]))
+	//else if ((color == 'b' && board::isComputer[0]) || (color == 'r' && board::isComputer[1]))
 	{
 		//call a function from game for alpha beta search results
 		//cout << "The computer will make a move." << endl;
@@ -48,9 +48,9 @@ void board::printEBoard()
 		//searched for a total of t seconds.
 		//The chosen move is: (1,2) -> (3,4)
 	}
-	inputCommand();
+	inputCommand(mlist);
 }
-void board::makeMove(move* m)
+void board::makeMove(move* m)	//seems to work well
 {
 	if (!m->jpoints.empty())
 	{
@@ -80,19 +80,26 @@ void board::makeMove(move* m)
 	changeTurn();							//change player's turn
 }
 
-void board::printBoard()
+void board::printBoard(list<move*>& mlist)	//works
 {
 	cout << "Current board:" << endl;
 	cout << endl;
-	cout << "Player 1 is " << printcolor('b') << " (normal piece) and " << printcolor('B') <<
-			" (king)" << endl;
-	cout << "Player 2 is " << printcolor('r') << " (normal piece) and " << printcolor('R') <<
-			" (king)" << endl;
+	cout << "Player 1 is ";
+	printcolor('b');
+	cout << " (normal piece) and ";
+	printcolor('B');
+	cout << " (king)" << endl;
+	cout << "Player 2 is ";
+	printcolor('r');
+	cout << " (normal piece) and ";
+	printcolor('R');
+	cout <<	" (king)" << endl;
 	int count = 0;
 	cout << "    " << count;
+	++count;
 	while (count != 8)
 	{
-		cout << "   " << ++count;
+		cout << "   " << count++;
 	}
 	cout << " " << endl;
 	//padded 4 spaces in front
@@ -116,10 +123,10 @@ void board::printBoard()
 		cout << "Player 1 to move." << endl;
 	else cout << "Player 2 to move." << endl;
 	cout << "The legal moves are:" << endl;
-	printMoves();
+	printMoves(mlist);
 	cout << endl;
 }
-
+/*
 void board::startup()		//determines whether or not players will be a computer calls modifyBoard
 {
 	board::whoComputer();
@@ -142,7 +149,7 @@ void board::startup()		//determines whether or not players will be a computer ca
 	{
 		//implement timer stuff
 	}
-}
+}*/
 
 
 

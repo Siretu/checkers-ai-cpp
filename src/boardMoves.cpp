@@ -13,7 +13,7 @@
 using std::list;
 using std::toupper;
 
-void board::checkNeighbors(int& x, int& y)
+void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work fine
 {
 	if (color == 'b' || arr[x][y] == 'R')
 	{
@@ -23,13 +23,13 @@ void board::checkNeighbors(int& x, int& y)
 		//if it's a king (on appropriate turn), check backwards too
 		if (x % 2 == 0)
 		{
-			createMove(x, y, x+1, y);
-			createMove(x, y, x+1, y+1);
+			createMove(mlist, x, y, x+1, y);
+			createMove(mlist, x, y, x+1, y+1);
 		}
 		else
 		{
-			createMove(x, y, x+1, y);
-			createMove(x, y, x+1, y-1);
+			createMove(mlist, x, y, x+1, y);
+			createMove(mlist, x, y, x+1, y-1);
 		}
 	}
 	if (color == 'r' || arr[x][y] == 'B')
@@ -39,18 +39,18 @@ void board::checkNeighbors(int& x, int& y)
 		//will always subtract x coordinate
 		if (x % 2 == 0)
 		{
-			createMove(x, y, x-1, y);
-			createMove(x, y, x-1, y+1);
+			createMove(mlist, x, y, x-1, y);
+			createMove(mlist, x, y, x-1, y+1);
 		}
 		else
 		{
-			createMove(x, y, x-1, y);
-			createMove(x, y, x-1, y-1);
+			createMove(mlist, x, y, x-1, y);
+			createMove(mlist, x, y, x-1, y-1);
 		}
 	}
 }
 
-void board::createMove(const int& xi,const int& yi, int xf, int yf)
+void board::createMove(list<move*>& mlist, const int& xi,const int& yi, int xf, int yf)	//works fine
 {
 	if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 	{
@@ -62,14 +62,19 @@ void board::createMove(const int& xi,const int& yi, int xf, int yf)
 	}
 }
 
-bool board::listMoves()	//returns true if there are any regular moves
+bool board::listMoves(list<move*>& mlist)	//returns true if there are any regular moves, seems to work fine
 {
+	while (!mlist.empty())
+	{
+		delete mlist.front();
+		mlist.pop_front();
+	}
 	for (int i = 0; i!= 8; ++i)
 	{
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
-				checkNeighbors(i, j);
+				checkNeighbors(mlist, i, j);
 		}
 	}
 	if (mlist.empty())
