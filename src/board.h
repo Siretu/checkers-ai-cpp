@@ -19,7 +19,7 @@
 class board
 {
 	char arr[8][4];
-	//first coord is x, second is y
+	//first coordinate is x, second is y
 	char color;
 	//'b' for black, 'r' for red
 	//indicates who's turn it is
@@ -29,10 +29,12 @@ class board
 	//[0] for black, [1] for red
 	static bool isComputer[2];
 	//[0] for black, [1] for red
-
-	std::list<move*> mlist;
-	//list of all the moves available
-
+	//default initialized to false since it's a static array
+	bool gameOver;
+	//true if the game is finished
+	//false otherwise
+	//
+	//
 	//functions for jumps:
 	void createJump(std::list<jump*>&, int, int, int, int, jump*);
 
@@ -57,14 +59,12 @@ class board
 		arr[j->x][j->y] = j->c;
 	}
 
+	//
+	//
 	//functions for regular moves:
 	void checkNeighbors(int&, int&);
 
-	void createMove(const int& xi,const int& yi, int xf, int yf)
-	{
-		if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
-			mlist.push_back(new move(xi, yi, xf, yf));
-	}
+	void createMove(const int&, const int&, int, int);
 
 	void handleKinging(const int& x, const int& y)
 	{
@@ -92,12 +92,21 @@ class board
 		return false;
 	}
 
-	void modifyBoard(std::ifstream&); //create a board from an input file
+	//change turn, called after a move is made
+	void changeTurn()
+	{
+		if (color == 'r')
+			color = 'b';
+		else
+			color = 'r';
+	}
 
+
+	//
+	//
+	//functions for printing:
 	void convert(const int&, const int&, std::string&);
 	//converts an int to character form appends it to command list for a move
-
-	void convertCommand(const std::string&); //converts command and prints it
 
 	void inputCommand();	//prints out directions  + available moves
 
@@ -118,34 +127,39 @@ class board
 
 	void printline(const int&, const std::string&, const std::string&);
 
-	static void whoComputer(); //modifies who is a computer, called by startup
+	//
+	//
+	//modifies who is a computer, called by startup
+	static void whoComputer();
 
 public:
+	std::list<move*> mlist;
+	//list of all the moves available
+	//make it public so that alpha-beta search can access it
 
-	board(char c);
+	board();
 	//use default copy constructor for copying boards
 	//then use makeMove
 	~board();
+
+	//create a board from an input file
+	void modifyBoard(std::ifstream&);
 
 	bool board::terminalTest()	//use this in conjunction with color member
 	//like if terminalTest and color = 'b' / 'r'
 	//call terminal test first, movesAvailable will automatically create a list of moves
 	//test for end
 	{
-		if (!movesAvailable())
+		if (!movesAvailable() || (color == 'b' && piecesCount[0] == 0) ||
+				(color == 'r' && piecesCount[1] == 0))
+		{
 			return true;
-		if (color == 'b' && piecesCount[0] == 0)
-			return true;
-		if (color == 'r' && piecesCount[1] == 0)
-			return true;
+			gameOver = true;
+		}
 		return false;
 	}
 
-	void printEBoard() //prints everything necessary, calls printBoard and inputCommand
-	{
-		printBoard();
-		inputCommand();
-	}
+	void printEBoard(); //prints everything necessary, calls printBoard and inputCommand
 
 	void makeMove(move*);
 	void printBoard();	//expands and prints board
@@ -154,14 +168,6 @@ public:
 	//NEED TO IMPLEMENT TIMER STUFF
 
 	char getTurn() {return color;}
-
-	void changeTurn()
-	{
-		if (color == 'r')
-			color = 'b';
-		else
-			color = 'r';
-	}
 };
 
 class move
@@ -201,6 +207,35 @@ public:
 	jump(char piece, int xc, int yc, int xe, int ye, jump* p):
 		c(piece), x(xc), y(yc), xend(xe), yend(ye), prev(p), numtimes(0), noNext(true) {}
 };
+
+
+//miscellaneous functions for parsing
+inline void remove_carriage_return(std::string& line)
+//eliminate the \r character in a string
+//this is needed in some cases of getline
+{
+    if (*line.rbegin() == '\r')
+    {
+        line.erase(line.length() - 1);
+    }
+}
+
+//used for computer's move, when it says the chosen move is: (1,2) -> (3,4)
+void convertCommand(const std::string& s)
+{
+	string::const_iterator it = s.begin();
+	std::cout << "(" << (*it) << ", ";
+	it += 2;
+	std::cout << (*it) << ") ";
+	it += 2;
+	while (*it != '-')
+	{
+		std::cout << "-> (" << (*it) << ", ";
+		it += 2;
+		std::cout << (*it) << ") ";
+		it += 2;
+	}
+}
 
 
 #endif /* BOARD_H_ */
