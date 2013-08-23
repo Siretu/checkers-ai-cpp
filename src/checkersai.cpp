@@ -17,17 +17,10 @@ int main()
 	cout << "Hello World!" << endl;
 	board b;
 	list<move*> m;
-	b.terminalTest(m);
-	b.printEBoard(m);
-	b.terminalTest(m);
-	b.printEBoard(m);
-	b.terminalTest(m);
-	cout << "works" << endl;
-	b.printEBoard(m);
-	b.terminalTest(m);
-	b.printEBoard(m);
-	//stops working after a few times??? whY?!?!?!?
-	//JUMPS NOT WORKING!!!!!!!!!!! FIXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-	//delete b;
-	//need to move moves out of board
+	for (int i = 0; i != 100; i++)
+	{
+		b.terminalTest(m);
+		b.printEBoard(m);
+	}
+	//messes up for multiple jumps needs fix
 }

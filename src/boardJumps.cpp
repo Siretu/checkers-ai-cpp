@@ -7,9 +7,12 @@
 
 #include <assert.h>
 #include "board.h"
+#include <iostream>
 #include <cctype>
 #include <list>
 
+using std::cout;
+using std::endl;
 using std::list;
 using std::toupper;
 
@@ -32,7 +35,7 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 	{
 		jump* jp = jlist.front();
 		move* m = new move(x, y, -1, -1);
-		while (jp->prev != NULL)
+		while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
 		{
 			m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
 			--jp->numtimes;
@@ -89,9 +92,9 @@ void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i,
 		if (x % 2 == 0)	//even x
 		{
 			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
-				createJump(jlist, x+1, y, x+2, y-1, jp);
+				createJump(jlist, x-1, y, x-2, y-1, jp);
 			if (jumpConditions(x-1, y+1, x-2, y+1))	//checks right up jump
-				createJump(jlist, x+1, y+1, x+2, y+1, jp);
+				createJump(jlist, x-1, y+1, x-2, y+1, jp);
 		}
 		else	//odd x
 		{
@@ -118,6 +121,12 @@ bool board::jumpsAvailable(list<move*>& mlist)
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
 				jumpAvailable(jlist, i, j);
+				if (!jlist.empty())
+				/*{
+					cout << color << endl;
+					cout << jlist.front()->x<< " " << jlist.front()->y << " " << jlist.front()->c << endl;
+					cout << jlist.front()->xend<< " " << jlist.front()->yend << " " << jlist.front()->numtimes << endl;
+				}*/
 				createJumpMove(mlist, jlist, i, j);
 			}
 		}
@@ -125,6 +134,14 @@ bool board::jumpsAvailable(list<move*>& mlist)
 	if (mlist.empty())
 		return false;
 	return true;
+}
+
+bool board::jumpConditions(int xj, int yj, int xe, int ye)
+{
+	if (isValidPos(xj, yj) && isValidPos(xe, ye) && arr[xj][yj] != 'e' &&
+			arr[xj][yj] != color && arr[xe][ye] == 'e' &&  arr[xj][yj] != std::toupper(color))
+		return true;
+	return false;
 }
 
 void board::recurseInc(jump* j)	//recursively increment numtimes

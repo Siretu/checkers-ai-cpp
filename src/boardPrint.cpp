@@ -103,14 +103,17 @@ void board::printMoves(list<move*>& mlist)	//works fine
 	list<move*>::const_iterator it = mlist.begin();
 	for (; it != mlist.end(); ++it)
 	{
-		cout << "Move: (" << (*it)->xi << ", " << convertY((*it)->xi, (*it)->yi) << ") -> ";
+		//cout << (*it)->command << endl;
+		cout << "Move: (" << (*it)->xi << ", " << convertY((*it)->xi, (*it)->yi) << ")";
 		if (!(*it)->jpoints.empty())
 		{
 			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
 			for (; iter != (*it)->jpoints.end(); ++iter)
-				cout << "(" << (*iter)->xend << ", " << convertY((*iter)->xend, (*iter)->yend) << ") -> ";
+				cout << " -> (" << (*iter)->xend << ", " << convertY((*iter)->xend, (*iter)->yend) << ")";
+			cout << endl;
 		}
-		cout << "(" << (*it)->xf << ", " << convertY((*it)->xf, (*it)->yf) << ")" << endl;
+		else
+			cout << " -> (" << (*it)->xf << ", " << convertY((*it)->xf, (*it)->yf) << ")" << endl;
 	}
 }
 

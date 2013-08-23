@@ -82,13 +82,7 @@ class board
 
 	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
 
-	bool jumpConditions(int xj, int yj, int xe, int ye)
-	{
-		if (isValidPos(xj, yj) && isValidPos(xe, ye) && arr[xj][yj] != 'e' &&
-				arr[xj][yj] != color && arr[xe][ye] == 'e' &&  arr[xj][yj] != std::toupper(color))
-			return true;
-		return false;
-	}
+	bool jumpConditions(int, int, int, int);
 
 	void recurseInc(jump*);
 
@@ -159,6 +153,7 @@ class board
 	}
 
 	void convertCommand(const std::string&);
+
 	void inputCommand(std::list<move*>&);	//prints out directions  + available moves
 
 	void printMoves(std::list<move*>&); //prints moves in order listed in the list
