@@ -30,15 +30,16 @@ public:
 	// 	3->4 will be created twice, once for each path taken
 	//	they will be exactly the same
 	bool noNext;	//when there are no next moves, noNext is true
-	int numtimes; //number times the jump was utilized (for branching scenarios
-	//when it hits zero, delete it because it's done
-	char c;
+	char c;		//charcter jumped over
+	int xs;		//start point
+	int ys;
 	int x;		//jumped character point
 	int y;
 	int xend;	//x endpoint
 	int yend;	//y endpoint
-	jump(char piece, int xc, int yc, int xe, int ye, jump* p):
-		prev(p),  noNext(true), numtimes(0), c(piece), x(xc), y(yc), xend(xe), yend(ye) {}
+	jump(char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
+		prev(p), noNext(true), c(piece), xs(xs), ys(ys),
+		 x(xc), y(yc), xend(xe), yend(ye) {}
 };
 
 class move
@@ -68,13 +69,11 @@ class board
 	static bool isComputer[2];
 	//[0] for black, [1] for red
 	//default initialized to false since it's a static array
-	bool gameOver;
-	//true if the game is finished
-	//false otherwise
+
 	//
 	//
 	//functions for jumps:
-	void createJump(std::list<jump*>&, int, int, int, int, jump*);
+	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
 
 	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
 
@@ -86,10 +85,13 @@ class board
 
 	void recurseInc(jump*);
 
-	void undoJump(jump* j) //used to reverse a jump
+	/*void undoJump(jump* j) //used to reverse a jump
 	{
+		arr[j->xs][j->ys] = arr[j->xend][j->yend];
 		arr[j->x][j->y] = j->c;
-	}
+		arr[j->xend][j->yend] = 'e';
+	}*/
+	void undoMove(move*); //reverses a jumping move
 
 	//
 	//
@@ -197,10 +199,7 @@ public:
 	{
 		if (!movesAvailable(mlist) || (color == 'b' && piecesCount[0] == 0) ||
 				(color == 'r' && piecesCount[1] == 0))
-		{
 			return true;
-			gameOver = true;
-		}
 		return false;
 	}
 

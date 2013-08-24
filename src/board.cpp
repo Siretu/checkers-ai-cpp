@@ -19,7 +19,7 @@ using std::string;
 using std::stringstream;
 
 //public constructors
-board::board(): color('b'), gameOver(false)
+board::board(): color('b')
 {
 	piecesCount[0] = 12;
 	piecesCount[1] = 12;
@@ -45,7 +45,7 @@ move::~move()
 	}
 }
 
-void board::modifyBoard(ifstream& fin)
+void board::modifyBoard(ifstream& fin)	//works fine
 {
 	//store it all in a list
 	//parse each line

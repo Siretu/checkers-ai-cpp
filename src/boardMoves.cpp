@@ -15,7 +15,7 @@ using std::toupper;
 
 void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work fine
 {
-	if (color == 'b' || arr[x][y] == 'R')
+	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
 	{
 		//if it's odd subtract or stay same for y coordinate
 		//if it's even add or stay same
@@ -32,7 +32,7 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work f
 			createMove(mlist, x, y, x+1, y-1);
 		}
 	}
-	if (color == 'r' || arr[x][y] == 'B')
+	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
 	{
 		//if it's even add or stay the same
 		//if it's odd subtract or stay the same

@@ -64,6 +64,7 @@ void board::convertCommand(const string& s)
 //functions for outputting commands
 void board::inputCommand(list<move*>& mlist)		//need to modify this for computer, PROBLEM!!!!!!!!!
 {
+	printMoves(mlist);
 	string m;
 	//edit below here, test if it's a computer, if it isn't run the below lines
 	//else run something else
@@ -100,6 +101,10 @@ void board::inputCommand(list<move*>& mlist)		//need to modify this for computer
 
 void board::printMoves(list<move*>& mlist)	//works fine
 {
+	if (color == 'b')
+		cout << "Player 1 to move." << endl;
+	else cout << "Player 2 to move." << endl;
+	cout << "The legal moves are:" << endl;
 	list<move*>::const_iterator it = mlist.begin();
 	for (; it != mlist.end(); ++it)
 	{
@@ -115,6 +120,7 @@ void board::printMoves(list<move*>& mlist)	//works fine
 		else
 			cout << " -> (" << (*it)->xf << ", " << convertY((*it)->xf, (*it)->yf) << ")" << endl;
 	}
+	cout << endl;
 }
 
 //function for printing a character in a different color in windows

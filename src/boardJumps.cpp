@@ -16,13 +16,19 @@ using std::endl;
 using std::list;
 using std::toupper;
 
+
+//problem remains for double jumps, needs better cleaning up, re-think backtracking and undoing jumps
+//seems to be problems there
+//seems to be able to handle single jumps but no double jumps
 //private member functions
 //functions for jumps
-void board::createJump(list<jump*>& jlist, int xj, int yj, int xe, int ye, jump* jp)
+void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
-	jump* j = new jump(arr[xj][yj], xj, yj, xe, ye, jp);
+	//cout << xj << " " << yj << " " << jp << " ";
+	jump* j = new jump(arr[xj][yj], xs, ys, xj, yj, xe, ye, jp);
 	arr[xj][yj] = 'e';	//deletes the character temporarily
-	recurseInc(j);
+	arr[xs][ys] = 'e';
+	arr[xe][ye] = c;
 	if (jp != NULL)
 		jp->noNext = false;
 	jlist.push_front(j);	//pushes the front, iterate from start to end, last jump is in front
@@ -30,10 +36,39 @@ void board::createJump(list<jump*>& jlist, int xj, int yj, int xe, int ye, jump*
 }
 
 void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x, const int& y)
+//better than before still bugs
+//and stackdump error
 {
-	while (!jlist.empty())
+	if (!jlist.empty())
 	{
-		jump* jp = jlist.front();
+		list<jump*>::const_iterator it = jlist.begin();
+		for (; it != jlist.end(); ++it)
+		{
+			if ((*it)->noNext)
+			{
+				move* m = new move(x, y, -1, -1);
+				jump* jp = (*it);
+				while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
+				{
+					m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
+					jp = jp->prev;
+				}
+				convert(x, y, m->command);
+				for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
+				{
+					convert((*it)->xend, (*it)->yend, m->command);
+					if ((*it)->noNext)	//if there's no next move for the jump
+					{
+						m->xf = (*it)->xend;
+						m->yf = (*it)->yend;
+					}
+				}
+				mlist.push_back(m);
+				m->command += "-1";
+				undoMove(m);	//undoes each jump, replaces the 'e's with original characters, resets char position
+			}
+		}
+		/*jump* jp = jlist.front();
 		move* m = new move(x, y, -1, -1);
 		while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
 		{
@@ -42,66 +77,45 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 			if (jp->numtimes == 0)
 				jlist.remove(jp);
 			jp = jp->prev;
-		}
-		convert(x, y, m->command);
-		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
-		{
-			convert((*it)->xend, (*it)->yend, m->command);
-			undoJump(*it);	//undoes each jump, replaces the 'e's with original characters
-			if ((*it)->noNext)	//if there's no next move for the jump
-			{
-				m->xf = (*it)->xend;
-				m->yf = (*it)->yend;
-			}
-		}
-		if(m->xf != -1 && m->yf != -1)
-		{
-			mlist.push_back(m);
-			m->command += "-1";
-		}
-		else
-		{
-			assert(m->jpoints.empty());
-			delete m;
-		}
+		}*/
 	}
-	assert(jlist.empty());
 }
 
 void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i, j are start points
 {
-	if (color == 'b' || arr[x][y] == 'R')
+	char c = arr[x][y];
+	if (tolower(c) == 'b' || arr[x][y] == 'R')
 	{
 		if (x % 2 == 0)	//even x
 		{
 			if (jumpConditions(x+1, y, x+2, y-1))	//checks left down jump
-				createJump(jlist, x+1, y, x+2, y-1, jp);
+				createJump(jlist, c, x, y, x+1, y, x+2, y-1, jp);
 			if (jumpConditions(x+1, y+1, x+2, y+1))	//checks right down jump
-				createJump(jlist, x+1, y+1, x+2, y+1, jp);
+				createJump(jlist, c, x, y, x+1, y+1, x+2, y+1, jp);
 		}
 		else	//odd x
 		{
 			if (jumpConditions(x+1, y-1, x+2, y-1))	//checks left down jump
-				createJump(jlist, x+1, y-1, x+2, y-1, jp);
+				createJump(jlist, c, x, y, x+1, y-1, x+2, y-1, jp);
 			if (jumpConditions(x+1, y, x+2, y+1))	//checks right down jump
-				createJump(jlist, x+1, y, x+2, y+1, jp);
+				createJump(jlist, c, x, y, x+1, y, x+2, y+1, jp);
 		}
 	}
-	if (color == 'r' || arr[x][y] == 'B')
+	if (tolower(c) == 'r' || arr[x][y] == 'B')
 	{
 		if (x % 2 == 0)	//even x
 		{
 			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
-				createJump(jlist, x-1, y, x-2, y-1, jp);
+				createJump(jlist, c, x, y, x-1, y, x-2, y-1, jp);
 			if (jumpConditions(x-1, y+1, x-2, y+1))	//checks right up jump
-				createJump(jlist, x-1, y+1, x-2, y+1, jp);
+				createJump(jlist, c, x, y, x-1, y+1, x-2, y+1, jp);
 		}
 		else	//odd x
 		{
 			if (jumpConditions(x-1, y-1, x-2, y-1))	//checks left up jump
-				createJump(jlist, x-1, y-1, x-2, y-1, jp);
+				createJump(jlist, c, x, y, x-1, y-1, x-2, y-1, jp);
 			if (jumpConditions(x-1, y, x-2, y+1))	//checks right up jump
-				createJump(jlist, x-1, y, x-2, y+1, jp);
+				createJump(jlist, c, x, y, x-1, y, x-2, y+1, jp);
 		}
 	}
 }
@@ -121,11 +135,15 @@ bool board::jumpsAvailable(list<move*>& mlist)
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
 				jumpAvailable(jlist, i, j);
-				if (!jlist.empty())
-				/*{
+				for (list<jump*>::iterator it = jlist.begin(); it != jlist.end(); it++)
+				{
+					cout << (*it)->x << " " << (*it)->y << endl;
+				}
+				/*if (!jlist.empty())
+				{
 					cout << color << endl;
 					cout << jlist.front()->x<< " " << jlist.front()->y << " " << jlist.front()->c << endl;
-					cout << jlist.front()->xend<< " " << jlist.front()->yend << " " << jlist.front()->numtimes << endl;
+					cout << jlist.front()->xend<< " " << jlist.front()->yend << " " << endl;
 				}*/
 				createJumpMove(mlist, jlist, i, j);
 			}
@@ -144,14 +162,18 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 	return false;
 }
 
-void board::recurseInc(jump* j)	//recursively increment numtimes
+void board::undoMove(move* m)
 {
-	++j->numtimes;
-	jump* jp = j;
-	while (j->prev != NULL)
+	char c = arr[m->xf][m->yf];
+	cout << c;
+	if (!m->jpoints.empty())
 	{
-		jp = j->prev;
-		++jp->numtimes;
+		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
+		{
+			arr[(*it)->xs][(*it)->ys] = 'e';
+			arr[(*it)->x][(*it)->y] = (*it)->c;
+			arr[(*it)->xend][(*it)->yend] = 'e';
+		}
 	}
+	arr[m->xi][m->yi] = c;
 }
-

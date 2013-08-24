@@ -28,7 +28,8 @@ using std::tolower;
 void board::printEBoard(list<move*>& mlist)	//seems to work well
 {
 	printBoard(mlist);
-	if (gameOver)
+	if (mlist.empty() || (color == 'b' && piecesCount[0] == 0) ||
+			(color == 'r' && piecesCount[1] == 0))
 	{
 		cout << "The game is over." << endl;
 		cout << endl;
@@ -40,15 +41,13 @@ void board::printEBoard(list<move*>& mlist)	//seems to work well
 		//cin
 	}
 	//else if ((color == 'b' && board::isComputer[0]) || (color == 'r' && board::isComputer[1]))
-	{
 		//call a function from game for alpha beta search results
 		//cout << "The computer will make a move." << endl;
 		//results of alpha beta search
 		//ex. completed search to depth
 		//searched for a total of t seconds.
 		//The chosen move is: (1,2) -> (3,4)
-	}
-	inputCommand(mlist);
+	else inputCommand(mlist);
 }
 void board::makeMove(move* m)	//seems to work well
 {
@@ -74,8 +73,9 @@ void board::makeMove(move* m)	//seems to work well
 			}
 		}
 	}
-	arr[m->xf][m->yf] = arr[m->xi][m->yi];	//move the piece
-	arr[m->xi][m->yi] = 'e';				//replace original position with 'e' (for empty)
+	char c = arr[m->xi][m->yi];
+	arr[m->xi][m->yi] = 'e';	//move the piece
+	arr[m->xf][m->yf] = c;				//replace original position with 'e' (for empty)
 	handleKinging(m->xf, m->yf);
 	changeTurn();							//change player's turn
 }
@@ -118,12 +118,6 @@ void board::printBoard(list<move*>& mlist)	//works
 		if (i != 7)
 			cout << linebreak << endl;
 	}
-	cout << endl;
-	if (color == 'b')
-		cout << "Player 1 to move." << endl;
-	else cout << "Player 2 to move." << endl;
-	cout << "The legal moves are:" << endl;
-	printMoves(mlist);
 	cout << endl;
 }
 /*
