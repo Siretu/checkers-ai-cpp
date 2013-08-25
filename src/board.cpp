@@ -38,11 +38,18 @@ board::board(): color('b')
 
 move::~move()
 {
-	while(!jpoints.empty())
+	for (list<jump*>::iterator it = jpoints.begin(); it != jpoints.end(); ++it)
 	{
-		delete jpoints.front();
-		jpoints.pop_front();
+		//std::cout << (*it) << " 1" << std::endl;
+		--(*it)->numTimes;
+		if ((*it)->numTimes == 0)
+		{
+			delete (*it);
+			std::cout << "Yess!!!" << std::endl;
+		}
+		//std::cout << (*it) << " 2" << std::endl;
 	}
+	//avoids accidentally double freeing
 }
 
 void board::modifyBoard(ifstream& fin)	//works fine

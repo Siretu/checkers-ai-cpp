@@ -35,7 +35,7 @@ void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int y
 	jumpAvailable(jlist, xe, ye, j);
 }
 
-void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x, const int& y)
+void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
 //better than before still bugs
 //and stackdump error
 {
@@ -46,14 +46,17 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 		{
 			if ((*it)->noNext)
 			{
-				move* m = new move(x, y, -1, -1);
+				move* m = new move(-1, -1, -1, -1);
 				jump* jp = (*it);
 				while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
 				{
 					m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
+					++jp->numTimes;
 					jp = jp->prev;
 				}
-				convert(x, y, m->command);
+				m->xi = m->jpoints.front()->xs;
+				m->yi = m->jpoints.front()->ys;
+				convert(m->jpoints.front()->xs, m->jpoints.front()->ys, m->command);
 				for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
 				{
 					convert((*it)->xend, (*it)->yend, m->command);
@@ -80,9 +83,14 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist, const int& x,
 		}*/
 	}
 }
+//need up to 8 cases!!!!
+//after each one terminates
+//create the move and undo it
+//repeat for the remaining cases
 
 void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i, j are start points
 {
+	//cout << jlist.size() << endl;
 	char c = arr[x][y];
 	if (tolower(c) == 'b' || arr[x][y] == 'R')
 	{
@@ -105,10 +113,10 @@ void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i,
 	{
 		if (x % 2 == 0)	//even x
 		{
-			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
-				createJump(jlist, c, x, y, x-1, y, x-2, y-1, jp);
 			if (jumpConditions(x-1, y+1, x-2, y+1))	//checks right up jump
 				createJump(jlist, c, x, y, x-1, y+1, x-2, y+1, jp);
+			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
+				createJump(jlist, c, x, y, x-1, y, x-2, y-1, jp);
 		}
 		else	//odd x
 		{
@@ -134,18 +142,18 @@ bool board::jumpsAvailable(list<move*>& mlist)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
-				jumpAvailable(jlist, i, j);
-				for (list<jump*>::iterator it = jlist.begin(); it != jlist.end(); it++)
+				jumpAvailable(jlist, i, j, NULL);
+				/*for (list<jump*>::iterator it = jlist.begin(); it != jlist.end(); it++)
 				{
 					cout << (*it)->x << " " << (*it)->y << endl;
-				}
+				}*/
 				/*if (!jlist.empty())
 				{
 					cout << color << endl;
 					cout << jlist.front()->x<< " " << jlist.front()->y << " " << jlist.front()->c << endl;
 					cout << jlist.front()->xend<< " " << jlist.front()->yend << " " << endl;
 				}*/
-				createJumpMove(mlist, jlist, i, j);
+				createJumpMove(mlist, jlist);
 			}
 		}
 	}
@@ -165,7 +173,7 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 void board::undoMove(move* m)
 {
 	char c = arr[m->xf][m->yf];
-	cout << c;
+	//cout << c;
 	if (!m->jpoints.empty())
 	{
 		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)

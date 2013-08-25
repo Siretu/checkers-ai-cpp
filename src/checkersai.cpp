@@ -18,15 +18,15 @@ int main()
 	//cout << "Hello World!" << endl;
 	board b;
 	list<move*> m;
-	ifstream fin("testfile2.txt");
+	ifstream fin("testfile1.txt");
 	b.modifyBoard(fin);
 	b.terminalTest(m);
 	/*list<move*>::iterator it = m.begin();
 	for (; it != m.end(); it++)
 		cout << (*it)->command << endl;*/
 	b.printEBoard(m);
-		b.terminalTest(m);
-		b.printEBoard(m);
+	b.terminalTest(m);
+	b.printEBoard(m);
 
 	//STACKDUMP OPENS FOR BRANCHING TESTFILE1.TXT WHY?
 	//testfile 2 piece disappears!!!!!!!!, FIXEEEEEEEEEEDDD

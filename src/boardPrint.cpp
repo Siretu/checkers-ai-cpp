@@ -97,6 +97,7 @@ void board::inputCommand(list<move*>& mlist)		//need to modify this for computer
 		}
 	}
 	makeMove(*it);
+	//stack trace error for branching moves, after trying to access the array, this is problematic
 }
 
 void board::printMoves(list<move*>& mlist)	//works fine

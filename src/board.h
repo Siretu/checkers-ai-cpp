@@ -30,6 +30,8 @@ public:
 	// 	3->4 will be created twice, once for each path taken
 	//	they will be exactly the same
 	bool noNext;	//when there are no next moves, noNext is true
+	int numTimes;	//used to keep track of how many times jump was inserted into a move,
+	//prevents double freeing of memory
 	char c;		//charcter jumped over
 	int xs;		//start point
 	int ys;
@@ -37,9 +39,10 @@ public:
 	int y;
 	int xend;	//x endpoint
 	int yend;	//y endpoint
+	bool undid; //if the move has been undone
 	jump(char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
-		prev(p), noNext(true), c(piece), xs(xs), ys(ys),
-		 x(xc), y(yc), xend(xe), yend(ye) {}
+		prev(p), noNext(true), numTimes(0), c(piece), xs(xs), ys(ys),
+		 x(xc), y(yc), xend(xe), yend(ye), undid(false) {}
 };
 
 class move
@@ -75,15 +78,13 @@ class board
 	//functions for jumps:
 	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
 
-	void createJumpMove(std::list<move*>&, std::list<jump*>&, const int&, const int&);
+	void createJumpMove(std::list<move*>&, std::list<jump*>&);
 
 	void jumpAvailable(std::list<jump*>&, int, int, jump*);
 
 	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
 
 	bool jumpConditions(int, int, int, int);
-
-	void recurseInc(jump*);
 
 	/*void undoJump(jump* j) //used to reverse a jump
 	{
@@ -92,6 +93,8 @@ class board
 		arr[j->xend][j->yend] = 'e';
 	}*/
 	void undoMove(move*); //reverses a jumping move
+
+	void undoJumpList(std::list<jump*>&, char);
 
 	//
 	//
@@ -224,6 +227,7 @@ inline void remove_carriage_return(std::string& line)
         line.erase(line.length() - 1);
     }
 }
+
 
 
 #endif /* BOARD_H_ */
