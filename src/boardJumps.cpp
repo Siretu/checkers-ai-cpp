@@ -22,6 +22,7 @@ using std::toupper;
 //seems to be able to handle single jumps but no double jumps
 //private member functions
 //functions for jumps
+//just need to fix character replacement now!!!!!!!!!!!
 void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
 	//cout << xj << " " << yj << " " << jp << " ";
@@ -81,50 +82,109 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
 				jlist.remove(jp);
 			jp = jp->prev;
 		}*/
+		jlist.clear();
 	}
 }
 //need up to 8 cases!!!!
+//check each initial direction
+//create move
 //after each one terminates
 //create the move and undo it
 //repeat for the remaining cases
 
 void board::jumpAvailable(list<jump*>& jlist, int x, int y, jump* jp= NULL)	//i, j are start points
 {
+	checkJumpTR(jlist, x, y, jp);
+	checkJumpTL(jlist, x, y, jp);
+	checkJumpLR(jlist, x, y, jp);
+	checkJumpLL(jlist, x, y, jp);
 	//cout << jlist.size() << endl;
-	char c = arr[x][y];
-	if (tolower(c) == 'b' || arr[x][y] == 'R')
+	//the code below works, problem with branching
+	/*if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
 	{
 		if (x % 2 == 0)	//even x
 		{
 			if (jumpConditions(x+1, y, x+2, y-1))	//checks left down jump
-				createJump(jlist, c, x, y, x+1, y, x+2, y-1, jp);
+				createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y-1, jp);
 			if (jumpConditions(x+1, y+1, x+2, y+1))	//checks right down jump
-				createJump(jlist, c, x, y, x+1, y+1, x+2, y+1, jp);
+				createJump(jlist, arr[x][y], x, y, x+1, y+1, x+2, y+1, jp);
 		}
 		else	//odd x
 		{
 			if (jumpConditions(x+1, y-1, x+2, y-1))	//checks left down jump
-				createJump(jlist, c, x, y, x+1, y-1, x+2, y-1, jp);
+				createJump(jlist, arr[x][y], x, y, x+1, y-1, x+2, y-1, jp);
 			if (jumpConditions(x+1, y, x+2, y+1))	//checks right down jump
-				createJump(jlist, c, x, y, x+1, y, x+2, y+1, jp);
+				createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y+1, jp);
 		}
 	}
-	if (tolower(c) == 'r' || arr[x][y] == 'B')
+	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
 	{
 		if (x % 2 == 0)	//even x
 		{
 			if (jumpConditions(x-1, y+1, x-2, y+1))	//checks right up jump
-				createJump(jlist, c, x, y, x-1, y+1, x-2, y+1, jp);
+				createJump(jlist, arr[x][y], x, y, x-1, y+1, x-2, y+1, jp);
 			if (jumpConditions(x-1, y, x-2, y-1))	//checks left up jump
-				createJump(jlist, c, x, y, x-1, y, x-2, y-1, jp);
+				createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y-1, jp);
 		}
 		else	//odd x
 		{
 			if (jumpConditions(x-1, y-1, x-2, y-1))	//checks left up jump
-				createJump(jlist, c, x, y, x-1, y-1, x-2, y-1, jp);
+				createJump(jlist, arr[x][y], x, y, x-1, y-1, x-2, y-1, jp);
 			if (jumpConditions(x-1, y, x-2, y+1))	//checks right up jump
-				createJump(jlist, c, x, y, x-1, y, x-2, y+1, jp);
+				createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y+1, jp);
 		}
+	}*/
+}
+
+void board::checkJumpTR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
+//checks right up jump
+{
+	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
+	{
+		if ((x % 2 == 0) && (jumpConditions(x-1, y+1, x-2, y+1))) //even x
+			createJump(jlist, arr[x][y], x, y, x-1, y+1, x-2, y+1, jp);
+		//odd x
+		else if (jumpConditions(x-1, y, x-2, y+1))	//checks right up jump
+			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y+1, jp);
+	}
+}
+
+void board::checkJumpTL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
+//checks left up jump
+{
+	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
+	{
+		if ((x % 2 == 0) && (jumpConditions(x-1, y, x-2, y-1)))	//even x
+			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y-1, jp);
+		//odd x
+		else if (jumpConditions(x-1, y-1, x-2, y-1))
+			createJump(jlist, arr[x][y], x, y, x-1, y-1, x-2, y-1, jp);
+	}
+}
+
+void board::checkJumpLR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
+//checks right down jump
+{
+	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
+	{
+		if ((x % 2 == 0) && (jumpConditions(x+1, y+1, x+2, y+1)))
+			createJump(jlist, arr[x][y], x, y, x+1, y+1, x+2, y+1, jp);
+		//odd x
+		else if (jumpConditions(x+1, y, x+2, y+1))
+			createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y+1, jp);
+	}
+}
+
+void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
+//checks left down jump
+{
+	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
+	{
+		if ((x % 2 == 0) && (jumpConditions(x+1, y, x+2, y-1)))	//even x
+			createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y-1, jp);
+		//odd x
+		else if (jumpConditions(x+1, y-1, x+2, y-1))
+			createJump(jlist, arr[x][y], x, y, x+1, y-1, x+2, y-1, jp);
 	}
 }
 
@@ -142,17 +202,13 @@ bool board::jumpsAvailable(list<move*>& mlist)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
-				jumpAvailable(jlist, i, j, NULL);
-				/*for (list<jump*>::iterator it = jlist.begin(); it != jlist.end(); it++)
-				{
-					cout << (*it)->x << " " << (*it)->y << endl;
-				}*/
-				/*if (!jlist.empty())
-				{
-					cout << color << endl;
-					cout << jlist.front()->x<< " " << jlist.front()->y << " " << jlist.front()->c << endl;
-					cout << jlist.front()->xend<< " " << jlist.front()->yend << " " << endl;
-				}*/
+				checkJumpTR(jlist, i, j, NULL);
+				createJumpMove(mlist, jlist);
+				checkJumpTL(jlist, i, j, NULL);
+				createJumpMove(mlist, jlist);
+				checkJumpLR(jlist, i, j, NULL);
+				createJumpMove(mlist, jlist);
+				checkJumpLL(jlist, i, j, NULL);
 				createJumpMove(mlist, jlist);
 			}
 		}
@@ -172,8 +228,11 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 
 void board::undoMove(move* m)
 {
-	char c = arr[m->xf][m->yf];
-	//cout << c;
+	char c;
+	if (arr[m->xi][m->yi] != 'e')
+		c = arr[m->xi][m->yi];
+	else c = arr[m->xf][m->yf];
+	// replaces the starting jump point only if the starting jump hasn't already been replaced
 	if (!m->jpoints.empty())
 	{
 		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
@@ -183,5 +242,5 @@ void board::undoMove(move* m)
 			arr[(*it)->xend][(*it)->yend] = 'e';
 		}
 	}
-	arr[m->xi][m->yi] = c;
+		arr[m->xi][m->yi] = c;
 }

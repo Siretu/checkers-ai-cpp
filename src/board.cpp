@@ -43,10 +43,7 @@ move::~move()
 		//std::cout << (*it) << " 1" << std::endl;
 		--(*it)->numTimes;
 		if ((*it)->numTimes == 0)
-		{
 			delete (*it);
-			std::cout << "Yess!!!" << std::endl;
-		}
 		//std::cout << (*it) << " 2" << std::endl;
 	}
 	//avoids accidentally double freeing

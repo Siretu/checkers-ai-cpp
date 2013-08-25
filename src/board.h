@@ -31,6 +31,7 @@ public:
 	//	they will be exactly the same
 	bool noNext;	//when there are no next moves, noNext is true
 	int numTimes;	//used to keep track of how many times jump was inserted into a move,
+	//increment every time jump is concatenated to a move
 	//prevents double freeing of memory
 	char c;		//charcter jumped over
 	int xs;		//start point
@@ -80,11 +81,19 @@ class board
 
 	void createJumpMove(std::list<move*>&, std::list<jump*>&);
 
-	void jumpAvailable(std::list<jump*>&, int, int, jump*);
+	bool jumpAvailable(std::list<jump*>&, int, int, jump*);
 
 	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
 
 	bool jumpConditions(int, int, int, int);
+
+	void checkJumpTR(std::list<jump*>&, int, int, jump*);
+
+	void checkJumpTL(std::list<jump*>&, int, int, jump*);
+
+	void checkJumpLR(std::list<jump*>&, int, int, jump*);
+
+	void checkJumpLL(std::list<jump*>&, int, int, jump*);
 
 	/*void undoJump(jump* j) //used to reverse a jump
 	{
