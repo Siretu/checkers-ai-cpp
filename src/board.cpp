@@ -54,6 +54,18 @@ board::~board()
 	}
 }
 
+board::board(const board& b): color(b.color)
+{
+	for (int i = 0; i != 8; ++i)
+		for (int j = 0; j != 4; ++j)
+			arr[i][j] = b.arr[i][j];
+	for (int i = 0; i != 2; ++i)
+	{
+		piecesCount[i] = b.piecesCount[i];
+		kingCount[i] = b.kingCount[i];
+	}
+}
+
 move::~move()
 {
 	//frees the memory allocated on the heap for each jump pointer

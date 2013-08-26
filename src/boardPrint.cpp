@@ -20,31 +20,37 @@ using std::endl;
 using std::list;
 using std::string;
 
+//converts a position on the compressed 8x4 matrix
+//to a component of a command for the expanded 8x8 matrix
+//string s is the command the point is appended to
+//don't need to bound check because that has
+//already been done when creating moves and jumps
+//called by createJumpMove in boardJumps.cpp
+//called by createMove in boardMove.cpp
 void board::convert(const int& x, const int& y, string& s)
-//converts an int to character form and returns it
-//works fine
 {
 	//assert(0 <= x && x <= 7 && 0 <= y && y <= 3);
-	if( 0 <= x && x <= 7 && 0 <= y && y <= 3)
-	{
-		 char c1 = '0' + x;
-		 char c2;
-		 if (x % 2 == 0)
-		 {
-			 c2 = '0' + (2*y + 1);
-		 }
-		 else
-		 {
-			 c2 = '0' + (2*y);
-		 }
-		 s += c1;
-		 s += ' ';
-		 s += c2;
-		 s += ' ';
-	}
+	 char c1 = '0' + x;
+	 char c2;
+	 if (x % 2 == 0)
+	 {
+		 c2 = '0' + (2*y + 1);
+	 }
+	 else
+	 {
+		 c2 = '0' + (2*y);
+	 }
+	 s += c1;
+	 s += ' ';
+	 s += c2;
+	 s += ' ';
 }
 
-//used for computer's move and for selected move, to print out move
+//used to print out all available moves
+//takes a command as an argument and displays it
+//2 3 3 2 -1
+//is converted to (2, 3) -> (3, 2)
+//called by inputCommand
 void board::convertCommand(const string& s)
 {
 	string::const_iterator it = s.begin();
@@ -62,18 +68,24 @@ void board::convertCommand(const string& s)
 }
 
 //functions for outputting commands
-void board::inputCommand()		//need to modify this for computer, PROBLEM!!!!!!!!!
+//for humans, ask for move
+//for computer, this function will never be called
+//instead another case will run in printEBoard which is found in boardPublic.cpp
+void board::inputCommand()
 {
 	printMoves();
 	string m;
-	//edit below here, test if it's a computer, if it isn't run the below lines
-	//else run something else
 	cout << "Enter a sequence of integers indicating a move." << endl;
 	cout << "Each set of two integers represents a position." << endl;
 	cout << "End the sequence with -1." << endl;
 	cout << "For example: 2 3 3 2 -1" << endl;
 	cout <<	"	represents (2,3) -> (3,2)" << endl;
 	cout << "Enter move: ";
+
+	//enter a command
+	//try to match the command with one in the list of moves
+	//if the end of the list is reached
+	//input command again until one is matched
 	getline(cin, m);
 	remove_carriage_return(m);
 	assert(*m.rbegin() != '\0');
@@ -96,11 +108,14 @@ void board::inputCommand()		//need to modify this for computer, PROBLEM!!!!!!!!!
 			it = mlist.begin();
 		}
 	}
+
+	//make the move selected
 	makeMove(*it);
-	//stack trace error for branching moves, after trying to access the array, this is problematic
 }
 
-void board::printMoves()	//works fine
+//decides whose turn it is to move based on color
+//prints out all the legal moves for the current board
+void board::printMoves()
 {
 	if (color == 'b')
 		cout << "Player 1 to move." << endl;
@@ -109,21 +124,18 @@ void board::printMoves()	//works fine
 	list<move*>::const_iterator it = mlist.begin();
 	for (; it != mlist.end(); ++it)
 	{
-		//cout << (*it)->command << endl;
-		cout << "Move: (" << (*it)->xi << ", " << convertY((*it)->xi, (*it)->yi) << ")";
-		if (!(*it)->jpoints.empty())
-		{
-			list<jump*>::const_iterator iter= (*it)->jpoints.begin();
-			for (; iter != (*it)->jpoints.end(); ++iter)
-				cout << " -> (" << (*iter)->xend << ", " << convertY((*iter)->xend, (*iter)->yend) << ")";
-			cout << endl;
-		}
-		else
-			cout << " -> (" << (*it)->xf << ", " << convertY((*it)->xf, (*it)->yf) << ")" << endl;
+		cout << "Move: ";
+		convertCommand((*it)->command);
+		cout << endl;
 	}
 	cout << endl;
 }
 
+//prints a line of the board
+//that does not contain any pieces
+//i.e something like: XXX|   |XXX|   |XXX|   |XXX|
+//cases vary by whether or not it's an even or odd row
+//called by printBoard in boardPublic.cpp
 void board::printline(const int& i, const string& lineEven, const string& lineOdd)
 {
 	if (i % 2 == 0)

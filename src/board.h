@@ -15,6 +15,9 @@
 #include <string>
 #include <windows.h>
 
+//need copy constructor for board
+//and operator= (maybe)
+
 class jump
 {
 public:
@@ -91,8 +94,6 @@ public:
 
 class board
 {
-	std::list<move*> mlist;
-
 	//first coordinate is x, second is y
 	//don't need an 8x8 array since only half the spaces are legal positions for pieces
 	char arr[8][4];
@@ -251,14 +252,23 @@ class board
 
 public:
 
-	//functions for board creation:
+	//list of moves for the board:
+	//public so that alpha beta search can access
+	//might make it private again and friend the alpha beta board search
+	//---------------------------------------------------------------------------------
+	std::list<move*> mlist;
+	//---------------------------------------------------------------------------------
+	//functions for board creation, found in board.cpp:
 	//---------------------------------------------------------------------------------
 	//constructor for initializing an initial board
-	//found in board.cpp:
 	board();
-	//use default copy constructor for copying boards
-	//then use makeMove
 
+	//copy constructor
+	//copies over all data values except the move list
+	//useful for creating new boards for each move in alpha-beta search
+	board(const board&);
+
+	//destructor deallocates memory for all the moves in mlist
 	~board();
 
 	//create a board from an input file:

@@ -111,15 +111,10 @@ void board::createJumpMove(list<jump*>& jlist)
 		}
 	}
 }
-//need up to 8 cases!!!!
-//check each initial direction
-//create move
-//after each one terminates
-//create the move and undo it
-//repeat for the remaining cases
 
 //compiled the code for jumping in all four directions
-void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NULL)	//i, j are start points
+//(x,y) is the start point
+void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NULL)
 {
 
 	if (tolower(c) == 'b' || c == 'R')
@@ -158,25 +153,27 @@ void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NU
 	}
 }
 
+//checks top right jump
 void board::checkJumpTR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-//checks right up jump
 {
 	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
 	{
-		if ((x % 2 == 0) && (jumpConditions(x-1, y+1, x-2, y+1))) //even x
+		//even x
+		if ((x % 2 == 0) && (jumpConditions(x-1, y+1, x-2, y+1)))
 			createJump(jlist, arr[x][y], x, y, x-1, y+1, x-2, y+1, jp);
 		//odd x
-		else if ((x % 2 != 0) && jumpConditions(x-1, y, x-2, y+1))	//checks right up jump
+		else if ((x % 2 != 0) && jumpConditions(x-1, y, x-2, y+1))
 			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y+1, jp);
 	}
 }
 
+//checks top left jump
 void board::checkJumpTL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-//checks left up jump
 {
 	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
 	{
-		if ((x % 2 == 0) && (jumpConditions(x-1, y, x-2, y-1)))	//even x
+		//even x
+		if ((x % 2 == 0) && (jumpConditions(x-1, y, x-2, y-1)))
 			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y-1, jp);
 		//odd x
 		else if ((x % 2 != 0) && jumpConditions(x-1, y-1, x-2, y-1))
@@ -184,11 +181,12 @@ void board::checkJumpTL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
 	}
 }
 
+//checks lower right jump
 void board::checkJumpLR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-//checks right down jump
 {
 	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
 	{
+		//even x
 		if ((x % 2 == 0) && (jumpConditions(x+1, y+1, x+2, y+1)))
 			createJump(jlist, arr[x][y], x, y, x+1, y+1, x+2, y+1, jp);
 		//odd x
@@ -197,12 +195,13 @@ void board::checkJumpLR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
 	}
 }
 
+//checks lower left jump
 void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-//checks left down jump
 {
 	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
 	{
-		if ((x % 2 == 0) && (jumpConditions(x+1, y, x+2, y-1)))	//even x
+		//even x
+		if ((x % 2 == 0) && (jumpConditions(x+1, y, x+2, y-1)))
 			createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y-1, jp);
 		//odd x
 		else if ((x % 2 != 0) && jumpConditions(x+1, y-1, x+2, y-1))
@@ -210,11 +209,16 @@ void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
 	}
 }
 
+//add moves to the move list
+//called by movesAvailable in board.h
 bool board::jumpsAvailable()
 {
-	//makes sure that the list is
+	//automatically clears all moves
+	//might need to get rid of this block when implementing alpha-beta
+	//copy constructor already handles move clearing
 	while (!mlist.empty())
 	{
+		cout << "Only relevant when a final move is made" << endl;
 		delete mlist.front();
 		mlist.pop_front();
 	}
@@ -268,13 +272,17 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 	return false;
 }
 
+//undoes a move
 void board::undoMove(move* m)
 {
+	//replaces the starting jump point only if the starting jump hasn't already been replaced
 	char c;
 	if (arr[m->xi][m->yi] != 'e')
 		c = arr[m->xi][m->yi];
 	else c = arr[m->xf][m->yf];
-	// replaces the starting jump point only if the starting jump hasn't already been replaced
+
+	//iterate through its list of jumps
+	//add back all the characters that were temporarily deleted
 	if (!m->jpoints.empty())
 	{
 		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
@@ -284,5 +292,7 @@ void board::undoMove(move* m)
 			arr[(*it)->xend][(*it)->yend] = 'e';
 		}
 	}
-		arr[m->xi][m->yi] = c;
+
+	//add the jumping piece in the start position of the move
+	arr[m->xi][m->yi] = c;
 }

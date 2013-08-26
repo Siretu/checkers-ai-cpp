@@ -18,19 +18,22 @@ int main()
 	//cout << "Hello World!" << endl;
 	board b;
 	//list<move*> m;
-	ifstream fin("testfile2.txt");
-	b.modifyBoard(fin);
+	//ifstream fin("testfile2.txt");
+	//b.modifyBoard(fin);
 	b.terminalTest();
 	b.printEBoard();
+	board ba(b);
+	ba.terminalTest();
+	ba.printEBoard();
 	/*list<move*>::iterator it = m.begin();
 	for (; it != m.end(); it++)
 		cout << (*it)->command << endl;*/
 	//b.printEBoard(m);
-	for (int i = 0; i != 100; i++)
+	/*for (int i = 0; i != 100; i++)
 	{
 		b.terminalTest();
 		b.printEBoard();
-	}
+	}*/
 
 	//should implement a smart pointer for move!!!!!!!!!
 	/*while (!m.empty())

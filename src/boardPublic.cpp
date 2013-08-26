@@ -21,11 +21,11 @@ using std::list;
 using std::string;
 using std::tolower;
 
-//
-//
-//
-//public member functions:
-void board::printEBoard()	//seems to work well
+//prints everything needed for a board
+//prints out game over message when necessary
+//need to add functionality for playing again
+//need to add functionality for computer calling alpha-beta search
+void board::printEBoard()
 {
 	printBoard();
 	if (mlist.empty() || (color == 'b' && piecesCount[0] == 0) ||
@@ -49,7 +49,12 @@ void board::printEBoard()	//seems to work well
 		//The chosen move is: (1,2) -> (3,4)
 	else inputCommand();
 }
-void board::makeMove(move* m)	//seems to work well
+
+//makes a move
+//if there's any jumps, they are implemented
+//pieces are erased and subtracted from the total count if necessary
+//moves the piece from one position to another
+void board::makeMove(move* m)
 {
 	if (!m->jpoints.empty())
 	{
@@ -73,14 +78,26 @@ void board::makeMove(move* m)	//seems to work well
 			}
 		}
 	}
+
+	//save the piece
 	char c = arr[m->xi][m->yi];
-	arr[m->xi][m->yi] = 'e';	//move the piece
-	arr[m->xf][m->yf] = c;				//replace original position with 'e' (for empty)
+
+	//replace the start position with an empty space
+	arr[m->xi][m->yi] = 'e';
+
+	//add back in the saved piece at the end point
+	arr[m->xf][m->yf] = c;
+
+	//check if the piece should be changed to a king
 	handleKinging(m->xf, m->yf);
-	changeTurn();							//change player's turn
+
+	//change player's turn
+	changeTurn();
 }
 
-void board::printBoard()	//works
+//print the board
+//called by printEBoard
+void board::printBoard()
 {
 	cout << "Current board:" << endl;
 	cout << endl;
@@ -102,22 +119,24 @@ void board::printBoard()	//works
 		cout << "   " << count++;
 	}
 	cout << " " << endl;
+
 	//padded 4 spaces in front
 	//then first number
 	//then 3 spaces
 	//last number is followed by 1 space and end line
-	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";
-	//padded 3 spaces
-	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";
-	//padded 6 spaces
-	string linebreak = "   -------------------------------";
-	//padded 3 spaces
+	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";		//padded 3 spaces
+	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";		//padded 6 spaces
+	string linebreak = "   -------------------------------";	//padded 3 spaces
+
+	//print the board
 	for (int i = 0; i != 8; ++i)
 	{
 		printline(i, lineEven, lineOdd);
 		if (i != 7)
 			cout << linebreak << endl;
 	}
+
+	//output a blank line before outputting moves
 	cout << endl;
 }
 /*
