@@ -71,7 +71,29 @@ void board::modifyBoard(ifstream& fin)	//works fine
 	remove_carriage_return(line);
 	stringstream ss(line);
 	ss >> color;
+	piecesCount[0] = 0;
+	piecesCount[1] = 0;
+	kingCount[0] = 0;
+	kingCount[1] = 0;
 	assert(color == 'b' || color == 'r');
+	for (int i = 0; i != 8; i++)
+		for (int j =0; j != 4; j++)
+		{
+			if (arr[i][j] == 'b')
+				++piecesCount[0];
+			else if (arr[i][j] == 'r')
+				++piecesCount[1];
+			else if (arr[i][j] == 'B')
+			{
+				++kingCount[0];
+				++piecesCount[0];
+			}
+			else if (arr[i][j] == 'R')
+			{
+				++kingCount[1];
+				++piecesCount[1];
+			}
+		}
 }
 
 

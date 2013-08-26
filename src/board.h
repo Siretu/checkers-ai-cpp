@@ -33,6 +33,7 @@ public:
 	int numTimes;	//used to keep track of how many times jump was inserted into a move,
 	//increment every time jump is concatenated to a move
 	//prevents double freeing of memory
+	bool visited;
 	char c;		//charcter jumped over
 	int xs;		//start point
 	int ys;
@@ -42,7 +43,7 @@ public:
 	int yend;	//y endpoint
 	bool undid; //if the move has been undone
 	jump(char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
-		prev(p), noNext(true), numTimes(0), c(piece), xs(xs), ys(ys),
+		prev(p), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
 		 x(xc), y(yc), xend(xe), yend(ye), undid(false) {}
 };
 
@@ -81,7 +82,7 @@ class board
 
 	void createJumpMove(std::list<move*>&, std::list<jump*>&);
 
-	bool jumpAvailable(std::list<jump*>&, int, int, jump*);
+	void jumpAvailable(std::list<jump*>&, char c, int, int, jump*);
 
 	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
 

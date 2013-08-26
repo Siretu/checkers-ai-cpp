@@ -18,21 +18,18 @@ int main()
 	//cout << "Hello World!" << endl;
 	board b;
 	list<move*> m;
-	ifstream fin("testfile1.txt");
+	/*ifstream fin("testfile2.txt");
 	b.modifyBoard(fin);
-	b.terminalTest(m);
+	b.terminalTest(m);*/
 	/*list<move*>::iterator it = m.begin();
 	for (; it != m.end(); it++)
 		cout << (*it)->command << endl;*/
-	b.printEBoard(m);
-	b.terminalTest(m);
-	b.printEBoard(m);
-
-	//STACKDUMP OPENS FOR BRANCHING TESTFILE1.TXT WHY?
-	//testfile 2 piece disappears!!!!!!!!, FIXEEEEEEEEEEDDD
-	//In the case where there are different jump sequences available,
-	//the player may chose which sequence to make, whether it results in the most pieces being taken or not.
-	//need to fix this!!!!!!!!!! especially in the case of testfile2
+	//b.printEBoard(m);
+	for (int i = 0; i != 100; i++)
+	{
+		b.terminalTest(m);
+		b.printEBoard(m);
+	}
 	/*
 	for (int i = 0; i != 100; i++)
 	{
