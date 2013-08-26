@@ -66,7 +66,7 @@ void board::createMove(const int& xi,const int& yi, int xf, int yf)
 	//check to make sure the adjacent piece is empty
 	if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 	{
-		move* m = new move(xi, yi, xf, yf);
+		move* m = new move(arr[xi][yi], xi, yi, xf, yf);
 		mlist.push_back(m);
 		convert(xi, yi, m->command);
 		convert(xf, yf, m->command);

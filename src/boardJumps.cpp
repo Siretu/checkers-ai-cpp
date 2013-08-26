@@ -24,14 +24,15 @@ using std::toupper;
 //also takes a jump pointer jp which represents the previous jump
 void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
-	jump* j = new jump(arr[xj][yj], xs, ys, xj, yj, xe, ye, jp);
+	jump* j = new jump(c, arr[xj][yj], xs, ys, xj, yj, xe, ye, jp);
 
 	//deletes the character jumped over temporarily
 	//it will be added in when the jumps are connected into a move
 	//and the move is undone
+	//the end space is not replaced because bugs will occur if it is
+	//instead the character is passed
 	arr[xj][yj] = 'e';
 	arr[xs][ys] = 'e';
-	arr[xe][ye] = c;
 
 	//check if the previous jump existed
 	//if it did, make noNext for that jump false
@@ -61,7 +62,7 @@ void board::createJumpMove(list<jump*>& jlist)
 		{
 			if ((*it)->noNext && (*it)->visited == false)
 			{
-				move* m = new move(-1, -1, -1, -1);
+				move* m = new move((*it)->jumpingPiece, -1, -1, -1, -1);
 				jump* jp = (*it);
 
 				//add all the appropriate jumps to the move's list of jumps
@@ -275,11 +276,6 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 void board::undoMove(move* m)
 {
 	//replaces the starting jump point only if the starting jump hasn't already been replaced
-	char c;
-	if (arr[m->xi][m->yi] != 'e')
-		c = arr[m->xi][m->yi];
-	else c = arr[m->xf][m->yf];
-
 	//iterate through its list of jumps
 	//add back all the characters that were temporarily deleted
 	if (!m->jpoints.empty())
@@ -293,5 +289,5 @@ void board::undoMove(move* m)
 	}
 
 	//add the jumping piece in the start position of the move
-	arr[m->xi][m->yi] = c;
+	arr[m->xi][m->yi] = m->mP;
 }

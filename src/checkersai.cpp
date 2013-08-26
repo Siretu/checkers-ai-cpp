@@ -19,8 +19,15 @@ int main()
 	board b;
 	//list<move*> m;
 	ifstream fin("testfile2.txt");
+	//small problem with testfile2
 	b.modifyBoard(fin);
 	//b.startup();
+	b.terminalTest();
+	b.printEBoard();
+	b.terminalTest();
+	b.printEBoard();
+	b.terminalTest();
+	b.printEBoard();
 	b.terminalTest();
 	b.printEBoard();
 	b.terminalTest();

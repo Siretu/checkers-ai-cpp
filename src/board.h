@@ -34,6 +34,9 @@ public:
 	//	they will be exactly the same
 	jump* prev;
 
+	//the piece jumping
+	char jumpingPiece;
+
 	//when there are no next moves, noNext is true
 	bool noNext;
 
@@ -61,14 +64,18 @@ public:
 	int yend;
 
 	//constructor for each data value
-	jump(char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
-		prev(p), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
+	jump(char jpingp, char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
+		prev(p), jumpingPiece(jpingp), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
 		 x(xc), y(yc), xend(xe), yend(ye){}
 };
 
 class move
 {
 public:
+
+	//moving piece
+	char mP;
+
 	//start point's coordinates
 	int xi;
 	int yi;
@@ -85,7 +92,7 @@ public:
 	std::list<jump*> jpoints;
 
 	//constructor for move
-	move(int xs, int ys, int xe, int ye): xi(xs), yi(ys), xf(xe), yf(ye) {}
+	move(char c, int xs, int ys, int xe, int ye): mP(c), xi(xs), yi(ys), xf(xe), yf(ye) {}
 
 	//destructor for move, found in board.cpp
 	//frees all the heap allocated memory for the jumps in jpoints
