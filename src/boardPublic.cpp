@@ -25,9 +25,9 @@ using std::tolower;
 //
 //
 //public member functions:
-void board::printEBoard(list<move*>& mlist)	//seems to work well
+void board::printEBoard()	//seems to work well
 {
-	printBoard(mlist);
+	printBoard();
 	if (mlist.empty() || (color == 'b' && piecesCount[0] == 0) ||
 			(color == 'r' && piecesCount[1] == 0))
 	{
@@ -47,7 +47,7 @@ void board::printEBoard(list<move*>& mlist)	//seems to work well
 		//ex. completed search to depth
 		//searched for a total of t seconds.
 		//The chosen move is: (1,2) -> (3,4)
-	else inputCommand(mlist);
+	else inputCommand();
 }
 void board::makeMove(move* m)	//seems to work well
 {
@@ -80,7 +80,7 @@ void board::makeMove(move* m)	//seems to work well
 	changeTurn();							//change player's turn
 }
 
-void board::printBoard(list<move*>& mlist)	//works
+void board::printBoard()	//works
 {
 	cout << "Current board:" << endl;
 	cout << endl;

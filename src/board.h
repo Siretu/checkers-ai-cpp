@@ -15,18 +15,6 @@
 #include <string>
 #include <windows.h>
 
-//smart pointer class, used for move pointers' automatic memory handling
-template <class T>
-class ptr
-{
-private:
-	T* my_pt;
-public:
-	ptr(T* pt) : my_pt(pt) {}
-	~ptr() {delete my_pt;}
-	T* operator->()	{return my_pt;}
-};
-
 class jump
 {
 public:
@@ -103,6 +91,8 @@ public:
 
 class board
 {
+	std::list<move*> mlist;
+
 	//first coordinate is x, second is y
 	//don't need an 8x8 array since only half the spaces are legal positions for pieces
 	char arr[8][4];
@@ -129,12 +119,12 @@ class board
 	//---------------------------------------------------------------------------------
 	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
 
-	void createJumpMove(std::list<move*>&, std::list<jump*>&);
+	void createJumpMove(std::list<jump*>&);
 
 	void jumpAvailable(std::list<jump*>&, char c, int, int, jump*);
 
 	//checks entire board for jumps and lists any moves with jumps, if there are any
-	bool jumpsAvailable(std::list<move*>&);
+	bool jumpsAvailable();
 
 	bool jumpConditions(int, int, int, int);
 
@@ -154,11 +144,11 @@ class board
 
 	//functions for regular moves, found in boardMoves.cpp
 	//---------------------------------------------------------------------------------
-	void checkNeighbors(std::list<move*>&, int&, int&);
+	void checkNeighbors(int&, int&);
 
-	void createMove(std::list<move*>&, const int&, const int&, int, int);
+	void createMove(const int&, const int&, int, int);
 
-	bool listMoves(std::list<move*>&);
+	bool listMoves();
 	//---------------------------------------------------------------------------------
 
 	//general functions used for moves and jumps
@@ -167,11 +157,11 @@ class board
 	//if there are any jumps, they are added to move list
 	//else if there are any moves, they are added to the move list
 	//if there are no jumps or moves available, it returns false
-	bool movesAvailable(std::list<move*>& mlist)
+	bool movesAvailable()
 	{
-		if (jumpsAvailable(mlist))
+		if (jumpsAvailable())
 			return true;
-		if (listMoves(mlist))
+		if (listMoves())
 			return true;
 		return false;
 	}
@@ -231,11 +221,11 @@ class board
 
 	//prints out directions and available moves
 	//need to add computer moves to it
-	void inputCommand(std::list<move*>&);
+	void inputCommand();
 
 	//prints moves in order listed in the list
 	//called by inputCommand in boardPrint.cpp
-	void printMoves(std::list<move*>&);
+	void printMoves();
 
 	//prints out a row of the checkers board
 	//called by boardPrint in boardPublic.cpp
@@ -269,6 +259,8 @@ public:
 	//use default copy constructor for copying boards
 	//then use makeMove
 
+	~board();
+
 	//create a board from an input file:
 	//found in board.cpp
 	void modifyBoard(std::ifstream&);
@@ -276,9 +268,9 @@ public:
 
 	//create a list of moves by calling this
 	//should be called each time a new board gets created after a move is made
-	bool terminalTest(std::list<move*>& mlist)
+	bool terminalTest()
 	{
-		if (!movesAvailable(mlist) || (color == 'b' && piecesCount[0] == 0) ||
+		if (!movesAvailable() || (color == 'b' && piecesCount[0] == 0) ||
 				(color == 'r' && piecesCount[1] == 0))
 			return true;
 		return false;
@@ -288,7 +280,7 @@ public:
 	//---------------------------------------------------------------------------------
 	//prints everything necessary, calls printBoard and inputCommand
 	//also prints out a game over message if applicable
-	void printEBoard(std::list<move*>&);
+	void printEBoard();
 
 	//makes the move
 	//should be used on a copy of a board when alpha-beta searching
@@ -296,7 +288,7 @@ public:
 
 	//expands and prints board
 	//called by printEBoard
-	void printBoard(std::list<move*>&);
+	void printBoard();
 
 	//Evaluation function, need to do
 	//will be implemented in alpha-beta search

@@ -50,7 +50,7 @@ void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int y
 }
 
 
-void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
+void board::createJumpMove(list<jump*>& jlist)
 {
 	if (!jlist.empty())
 	{
@@ -210,7 +210,7 @@ void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
 	}
 }
 
-bool board::jumpsAvailable(list<move*>& mlist)
+bool board::jumpsAvailable()
 {
 	//makes sure that the list is
 	while (!mlist.empty())
@@ -238,13 +238,13 @@ bool board::jumpsAvailable(list<move*>& mlist)
 				//so that all cases are accounted for
 				//TR - top right, TL - top left, LR - lower right, LL - lower left
 				checkJumpTR(jlist, i, j, NULL);
-				createJumpMove(mlist, jlist);
+				createJumpMove(jlist);
 				checkJumpTL(jlist, i, j, NULL);
-				createJumpMove(mlist, jlist);
+				createJumpMove(jlist);
 				checkJumpLR(jlist, i, j, NULL);
-				createJumpMove(mlist, jlist);
+				createJumpMove(jlist);
 				checkJumpLL(jlist, i, j, NULL);
-				createJumpMove(mlist, jlist);
+				createJumpMove(jlist);
 			}
 		}
 	}

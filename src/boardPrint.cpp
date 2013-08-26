@@ -62,9 +62,9 @@ void board::convertCommand(const string& s)
 }
 
 //functions for outputting commands
-void board::inputCommand(list<move*>& mlist)		//need to modify this for computer, PROBLEM!!!!!!!!!
+void board::inputCommand()		//need to modify this for computer, PROBLEM!!!!!!!!!
 {
-	printMoves(mlist);
+	printMoves();
 	string m;
 	//edit below here, test if it's a computer, if it isn't run the below lines
 	//else run something else
@@ -100,7 +100,7 @@ void board::inputCommand(list<move*>& mlist)		//need to modify this for computer
 	//stack trace error for branching moves, after trying to access the array, this is problematic
 }
 
-void board::printMoves(list<move*>& mlist)	//works fine
+void board::printMoves()	//works fine
 {
 	if (color == 'b')
 		cout << "Player 1 to move." << endl;

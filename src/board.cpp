@@ -45,6 +45,15 @@ board::board(): color('b')
 			arr[i][j] = 'r';
 }
 
+board::~board()
+{
+	while (!mlist.empty())
+	{
+		delete mlist.front();
+		mlist.pop_front();
+	}
+}
+
 move::~move()
 {
 	//frees the memory allocated on the heap for each jump pointer

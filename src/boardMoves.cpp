@@ -13,7 +13,7 @@
 using std::list;
 using std::toupper;
 
-void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work fine
+void board::checkNeighbors(int& x, int& y)	//seems to work fine
 {
 	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
 	{
@@ -23,13 +23,13 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work f
 		//if it's a king (on appropriate turn), check backwards too
 		if (x % 2 == 0)
 		{
-			createMove(mlist, x, y, x+1, y);
-			createMove(mlist, x, y, x+1, y+1);
+			createMove(x, y, x+1, y);
+			createMove(x, y, x+1, y+1);
 		}
 		else
 		{
-			createMove(mlist, x, y, x+1, y);
-			createMove(mlist, x, y, x+1, y-1);
+			createMove(x, y, x+1, y);
+			createMove(x, y, x+1, y-1);
 		}
 	}
 	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
@@ -39,18 +39,18 @@ void board::checkNeighbors(list<move*>& mlist, int& x, int& y)	//seems to work f
 		//will always subtract x coordinate
 		if (x % 2 == 0)
 		{
-			createMove(mlist, x, y, x-1, y);
-			createMove(mlist, x, y, x-1, y+1);
+			createMove(x, y, x-1, y);
+			createMove(x, y, x-1, y+1);
 		}
 		else
 		{
-			createMove(mlist, x, y, x-1, y);
-			createMove(mlist, x, y, x-1, y-1);
+			createMove(x, y, x-1, y);
+			createMove(x, y, x-1, y-1);
 		}
 	}
 }
 
-void board::createMove(list<move*>& mlist, const int& xi,const int& yi, int xf, int yf)	//works fine
+void board::createMove(const int& xi,const int& yi, int xf, int yf)	//works fine
 {
 	if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 	{
@@ -62,7 +62,7 @@ void board::createMove(list<move*>& mlist, const int& xi,const int& yi, int xf, 
 	}
 }
 
-bool board::listMoves(list<move*>& mlist)	//returns true if there are any regular moves, seems to work fine
+bool board::listMoves()	//returns true if there are any regular moves, seems to work fine
 {
 	while (!mlist.empty())
 	{
@@ -74,7 +74,7 @@ bool board::listMoves(list<move*>& mlist)	//returns true if there are any regula
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
-				checkNeighbors(mlist, i, j);
+				checkNeighbors(i, j);
 		}
 	}
 	if (mlist.empty())
