@@ -30,6 +30,13 @@ int main()
 		b.terminalTest(m);
 		b.printEBoard(m);
 	}
+
+	//should implement a smart pointer for move!!!!!!!!!
+	while (!m.empty())
+	{
+		delete m.front();
+		m.pop_front();
+	}
 	/*
 	for (int i = 0; i != 100; i++)
 	{

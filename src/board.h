@@ -15,11 +15,23 @@
 #include <string>
 #include <windows.h>
 
+//smart pointer class, used for move pointers' automatic memory handling
+template <class T>
+class ptr
+{
+private:
+	T* my_pt;
+public:
+	ptr(T* pt) : my_pt(pt) {}
+	~ptr() {delete my_pt;}
+	T* operator->()	{return my_pt;}
+};
 
 class jump
 {
 public:
-	jump* prev;				//unique previous jump, if it looks repetitive
+	//unique previous jump
+	//example:
 	//like in a diamond shape
 	//			4
 	//		3
@@ -29,62 +41,100 @@ public:
 	// 	1->2 ->3->4 is another multiple jump
 	// 	3->4 will be created twice, once for each path taken
 	//	they will be exactly the same
-	bool noNext;	//when there are no next moves, noNext is true
-	int numTimes;	//used to keep track of how many times jump was inserted into a move,
+	jump* prev;
+
+	//when there are no next moves, noNext is true
+	bool noNext;
+
+	//used to keep track of how many times jump was inserted into a move,
 	//increment every time jump is concatenated to a move
 	//prevents double freeing of memory
+	int numTimes;
+
+	//prevents moves from getting created twice
 	bool visited;
-	char c;		//charcter jumped over
-	int xs;		//start point
+
+	//character jumped over
+	char c;
+
+	//start point's x and y coordinate
+	int xs;
 	int ys;
-	int x;		//jumped character point
+
+	//jumped character's point coordinates
+	int x;
 	int y;
-	int xend;	//x endpoint
-	int yend;	//y endpoint
-	bool undid; //if the move has been undone
+
+	//end point of the jump
+	int xend;
+	int yend;
+
+	//constructor for each data value
 	jump(char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
 		prev(p), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
-		 x(xc), y(yc), xend(xe), yend(ye), undid(false) {}
+		 x(xc), y(yc), xend(xe), yend(ye){}
 };
 
 class move
 {
 public:
+	//start point's coordinates
 	int xi;
 	int yi;
+
+	//end point's coordinates
 	int xf;
 	int yf;
-	std::string command;	//command used to map a string to the move
+
+	//command used to map a string to the move
+	//used for when the player enters a string for a move
+	std::string command;
+
+	//list storing all the jumps made by the move
 	std::list<jump*> jpoints;
+
+	//constructor for move
 	move(int xs, int ys, int xe, int ye): xi(xs), yi(ys), xf(xe), yf(ye) {}
+
+	//destructor for move, found in board.cpp
+	//frees all the heap allocated memory for the jumps in jpoints
 	~move();
 };
 
 class board
 {
-	char arr[8][4];
 	//first coordinate is x, second is y
-	char color;
+	//don't need an 8x8 array since only half the spaces are legal positions for pieces
+	char arr[8][4];
+
 	//'b' for black, 'r' for red
 	//indicates who's turn it is
+	char color;
+
+	//[0] for black, [1] for red
 	int piecesCount[2];
+
 	//[0] for black, [1] for red
 	int kingCount[2];
-	//[0] for black, [1] for red
-	static bool isComputer[2];
+	//counts are useful in an evaluation function
+
 	//[0] for black, [1] for red
 	//default initialized to false since it's a static array
+	static bool isComputer[2];
+
 
 	//
 	//
-	//functions for jumps:
+	//functions for jumps: found in boardJumps.cpp
+	//---------------------------------------------------------------------------------
 	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
 
 	void createJumpMove(std::list<move*>&, std::list<jump*>&);
 
 	void jumpAvailable(std::list<jump*>&, char c, int, int, jump*);
 
-	bool jumpsAvailable(std::list<move*>&);	//checks entire board for jumps and list them if there are any
+	//checks entire board for jumps and lists any moves with jumps, if there are any
+	bool jumpsAvailable(std::list<move*>&);
 
 	bool jumpConditions(int, int, int, int);
 
@@ -96,25 +146,27 @@ class board
 
 	void checkJumpLL(std::list<jump*>&, int, int, jump*);
 
-	/*void undoJump(jump* j) //used to reverse a jump
-	{
-		arr[j->xs][j->ys] = arr[j->xend][j->yend];
-		arr[j->x][j->y] = j->c;
-		arr[j->xend][j->yend] = 'e';
-	}*/
-	void undoMove(move*); //reverses a jumping move
+	//reverses a jumping move
+	void undoMove(move*);
 
-	void undoJumpList(std::list<jump*>&, char);
+	//---------------------------------------------------------------------------------
 
-	//
-	//
-	//functions for regular moves:
+
+	//functions for regular moves, found in boardMoves.cpp
+	//---------------------------------------------------------------------------------
 	void checkNeighbors(std::list<move*>&, int&, int&);
 
 	void createMove(std::list<move*>&, const int&, const int&, int, int);
 
 	bool listMoves(std::list<move*>&);
+	//---------------------------------------------------------------------------------
 
+	//general functions used for moves and jumps
+	//---------------------------------------------------------------------------------
+	//called in the terminalTest function
+	//if there are any jumps, they are added to move list
+	//else if there are any moves, they are added to the move list
+	//if there are no jumps or moves available, it returns false
 	bool movesAvailable(std::list<move*>& mlist)
 	{
 		if (jumpsAvailable(mlist))
@@ -124,6 +176,9 @@ class board
 		return false;
 	}
 
+	//if a red piece 'r' reaches the red side's end, it becomes a red king 'R'
+	//if a black piece 'b' reaches the black side's end, it becomes a black king 'B'
+	//called at the end of the makeMove function, which is found in boardPublic.cpp
 	void handleKinging(const int& x, const int& y)
 	{
 		if (x == 0 && arr[x][y] == 'r')
@@ -132,13 +187,18 @@ class board
 			arr[x][y] = 'B';
 	}
 
-	bool isValidPos(int i, int j)	//works fine
+	//returns true if the position arr[i][j] is a valid position on the checker board
+	//called by jumpConditions, which is found in boardJumps.cpp
+	//called by createMove, which is found in boardMoves.cpp
+	bool isValidPos(int i, int j)
 	{
 		if (i >= 0 && i < 8 && j >= 0 && j < 4)
 			return true;
 		else return false;
 	}
+
 	//change turn, called after a move is made
+	//called by makeMove, which is found in boardPublic.cpp
 	void changeTurn()
 	{
 		if (color == 'r')
@@ -146,38 +206,47 @@ class board
 		else
 			color = 'r';
 	}
+	//---------------------------------------------------------------------------------
 
-
-	//
-	//
-	//functions for printing:
+	//functions for printing, found in boardPrint.cpp
+	//---------------------------------------------------------------------------------
+	//converts a point to string form and appends it to command list for a move
+	//called by createJumpMove in boardJumps.cpp
+	//called by createMove in boardMoves.cpp
 	void convert(const int&, const int&, std::string&);
-	//converts an int to character form appends it to command list for a move
 
-	int convertY(const int& x, const int& y)	//used for printing out moves
-	//works fine
+	//used for printing out moves, converting the y coordinate in the matrix
+	//to the coordinate on the expanded 8x8 board
+	//called in printMoves in boardPrint.cpp
+	int convertY(const int& x, const int& y)
 	{
 		 if (x % 2 == 0)
-		 {
 			 return (2*y + 1);
-		 }
-		 else
-		 {
-			 return (2*y);
-		 }
+		 else return (2*y);
 	}
 
+	//converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
+	//called in inputCommand in boardPrint.cpp
 	void convertCommand(const std::string&);
 
-	void inputCommand(std::list<move*>&);	//prints out directions  + available moves
+	//prints out directions and available moves
+	//need to add computer moves to it
+	void inputCommand(std::list<move*>&);
 
-	void printMoves(std::list<move*>&); //prints moves in order listed in the list
+	//prints moves in order listed in the list
+	//called by inputCommand in boardPrint.cpp
+	void printMoves(std::list<move*>&);
+
+	//prints out a row of the checkers board
+	//called by boardPrint in boardPublic.cpp
+	void printline(const int&, const std::string&, const std::string&);
 
 	//functions for printing lines and color characters in windows
 	void printcolor(const char&);
 	//change text color
 	//found at http://msdn.microsoft.com/en-us/library/ms682088(VS.85).aspx#_win32_character_attributes
 	//code for changing color found at http://www.cplusplus.com/forum/beginner/1640/
+	//does not work in console, will work in executable
 
 	WORD GetConsoleTextAttribute (HANDLE hCon)
 	{
@@ -185,52 +254,65 @@ class board
 	  GetConsoleScreenBufferInfo(hCon, &con_info);
 	  return con_info.wAttributes;
 	}
+	//---------------------------------------------------------------------------------
 
-	void printline(const int&, const std::string&, const std::string&);
-
-	//
-	//
 	//modifies who is a computer, called by startup
 	static void whoComputer();
 
 public:
-	//std::list<move*> mlist;
-	//list of all the moves available
-	//make it public so that alpha-beta search can access it
 
+	//functions for board creation:
+	//---------------------------------------------------------------------------------
+	//constructor for initializing an initial board
+	//found in board.cpp:
 	board();
 	//use default copy constructor for copying boards
 	//then use makeMove
 
-	//create a board from an input file
+	//create a board from an input file:
+	//found in board.cpp
 	void modifyBoard(std::ifstream&);
+	//---------------------------------------------------------------------------------
 
-	bool terminalTest(std::list<move*>& mlist)	//use this in conjunction with color member
-	//like if terminalTest and color = 'b' / 'r'
-	//call terminal test first, movesAvailable will automatically create a list of moves
-	//test for end
+	//create a list of moves by calling this
+	//should be called each time a new board gets created after a move is made
+	bool terminalTest(std::list<move*>& mlist)
 	{
 		if (!movesAvailable(mlist) || (color == 'b' && piecesCount[0] == 0) ||
 				(color == 'r' && piecesCount[1] == 0))
 			return true;
 		return false;
 	}
+	//---------------------------------------------------------------------------------
+	//functions found in boardPublic.cpp
+	//---------------------------------------------------------------------------------
+	//prints everything necessary, calls printBoard and inputCommand
+	//also prints out a game over message if applicable
+	void printEBoard(std::list<move*>&);
 
-	void printEBoard(std::list<move*>&); //prints everything necessary, calls printBoard and inputCommand
-
+	//makes the move
+	//should be used on a copy of a board when alpha-beta searching
 	void makeMove(move*);
-	void printBoard(std::list<move*>&);	//expands and prints board
-	void evaluate();	//Evaluation function, need to do
-	void startup();		//determines whether or not players will be a computer calls modifyBoard
+
+	//expands and prints board
+	//called by printEBoard
+	void printBoard(std::list<move*>&);
+
+	//Evaluation function, need to do
+	//will be implemented in alpha-beta search
+	void evaluate();
+
+	//determines whether or not players will be a computer calls modifyBoard
+	void startup();
 	//NEED TO IMPLEMENT TIMER STUFF
 
 	char getTurn() {return color;}
 };
 
-//miscellaneous functions for parsing
+//function for fixing strings obtained via getline
+//called by modifyBoard in board.cpp
 inline void remove_carriage_return(std::string& line)
-//eliminate the \r character in a string
-//this is needed in some cases of getline
+//eliminate the \r character in a string or the \0 character
 {
     if (*line.rbegin() == '\r' || *line.rbegin() == '\0')
     {

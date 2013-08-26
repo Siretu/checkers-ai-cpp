@@ -124,29 +124,6 @@ void board::printMoves(list<move*>& mlist)	//works fine
 	cout << endl;
 }
 
-//function for printing a character in a different color in windows
-void board::printcolor(const char& c)
-{
-	if (c == 'e')
-		cout << ' ';
-	else if (c == 'r' || c == 'R')	//sets piece as red color
-	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
-		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
-	}
-	else	//c is 'b' or 'B', sets pieces as green color
-	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
-	}
-}
-
 void board::printline(const int& i, const string& lineEven, const string& lineOdd)
 {
 	if (i % 2 == 0)
@@ -180,6 +157,30 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 		cout << lineOdd << endl;
 	}
 }
+
+//function for printing a character in a different color in windows
+void board::printcolor(const char& c)
+{
+	if (c == 'e')
+		cout << ' ';
+	else if (c == 'r' || c == 'R')	//sets piece as red color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
+	else	//c is 'b' or 'B', sets pieces as green color
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const int saved_colors = GetConsoleTextAttribute(hConsole);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		cout << c;
+		SetConsoleTextAttribute(hConsole, saved_colors);
+	}
+}
+
 
 /*void board::whoComputer()
 {

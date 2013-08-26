@@ -19,25 +19,43 @@ using std::toupper;
 
 //works completely now, even for branching, pass along the actual character instead of matrix position
 //since matrix position gets replaced when creating jumps
+
+//creates a new jump given the start position (xs, ys), jumped over position (xj, yj), and end position (xe, ye)
+//also takes a jump pointer jp which represents the previous jump
 void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
-	//cout << xj << " " << yj << " " << jp << " ";
 	jump* j = new jump(arr[xj][yj], xs, ys, xj, yj, xe, ye, jp);
-	arr[xj][yj] = 'e';	//deletes the character temporarily
+
+	//deletes the character jumped over temporarily
+	//it will be added in when the jumps are connected into a move
+	//and the move is undone
+	arr[xj][yj] = 'e';
 	arr[xs][ys] = 'e';
 	arr[xe][ye] = c;
+
+	//check if the previous jump existed
+	//if it did, make noNext for that jump false
+	//since the newly created jump is the next jump for that jump
 	if (jp != NULL)
 		jp->noNext = false;
-	jlist.push_front(j);	//pushes the front, iterate from start to end, last jump is in front
+
+	//add the newly created jump's address to the front of the list of jumps
+	//the last jump will be at the front
+	//order does not matter for createJumpMove
+	jlist.push_front(j);
+
+	//recursively call jumpAvailable, using the new end position
+	//keep track of what piece is currently making the jumps by passing it as parameter
 	jumpAvailable(jlist, c, xe, ye, j);
 }
 
+
 void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
-//better than before still bugs
-//and stackdump error
 {
 	if (!jlist.empty())
 	{
+		//iterate through the list of jumps
+		//create new moves when appropriate
 		list<jump*>::const_iterator it = jlist.begin();
 		for (; it != jlist.end(); ++it)
 		{
@@ -45,40 +63,52 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
 			{
 				move* m = new move(-1, -1, -1, -1);
 				jump* jp = (*it);
-				while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
+
+				//add all the appropriate jumps to the move's list of jumps
+				//reverse ordering, so that last jump is at the end of the list
+				//for each jump added, set visited as true
+				//visited is only needed for the last jump though
+				//increment the jump's numTimes
+				//repeat the loop until the first jump was added to the move's jump list
+				while (jp != NULL)
 				{
-					m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
+					m->jpoints.push_front(jp);
 					++jp->numTimes;
 					jp->visited = true;
 					jp = jp->prev;
 				}
+
+				//add the start point to the move's start position and to command
 				m->xi = m->jpoints.front()->xs;
 				m->yi = m->jpoints.front()->ys;
 				convert(m->jpoints.front()->xs, m->jpoints.front()->ys, m->command);
+
+				//iterate through the move's list of jumps
 				for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
 				{
+					//append the jump's end point to command
 					convert((*it)->xend, (*it)->yend, m->command);
-					if ((*it)->noNext)	//if there's no next move for the jump
+
+					//if there's no next move for the jump
+					if ((*it)->noNext)
 					{
 						m->xf = (*it)->xend;
 						m->yf = (*it)->yend;
 					}
 				}
+
+				//add the move to the move list
 				mlist.push_back(m);
+
+				//adds the -1 to the end of the command
 				m->command += "-1";
-				undoMove(m);	//undoes each jump, replaces the 'e's with original characters, resets char position
+
+				//undoes each jump
+				//replaces the 'e's with original characters
+				//resets current jumping piece's position, if necessary
+				undoMove(m);
 			}
 		}
-		/*jump* jp = jlist.front();
-		move* m = new move(x, y, -1, -1);
-		while (jp != NULL)	//PROBLEM WAS HERE FIXED!!!!!!!!
-		{
-			m->jpoints.push_front(jp);	//reverse ordering, so that last jump is at the end
-			--jp->numtimes;
-			if (jp->numtimes == 0)
-				jlist.remove(jp);
-			jp = jp->prev;
-		}*/
 	}
 }
 //need up to 8 cases!!!!
@@ -88,10 +118,10 @@ void board::createJumpMove(list<move*>& mlist, list<jump*>& jlist)
 //create the move and undo it
 //repeat for the remaining cases
 
+//compiled the code for jumping in all four directions
 void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NULL)	//i, j are start points
 {
 
-	//the code below works, problem with branching
 	if (tolower(c) == 'b' || c == 'R')
 	{
 		if (x % 2 == 0)	//even x
@@ -182,18 +212,31 @@ void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
 
 bool board::jumpsAvailable(list<move*>& mlist)
 {
+	//makes sure that the list is
 	while (!mlist.empty())
 	{
 		delete mlist.front();
 		mlist.pop_front();
 	}
+
+	//a list of jumps
 	list<jump*> jlist;
+
+	//iterate through the matrix
 	for (int i = 0; i!= 8; ++i)
 	{
 		for (int j = 0; j != 4; ++j)
 		{
+			//if the piece belongs to the current turn's color
+			//check it for jumps
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
+				//check jumps in each of the four directions
+				//then create jumping moves once the search is finished
+				//this will enable branching on the first jump, if necessary
+				//and it will restore the board each time
+				//so that all cases are accounted for
+				//TR - top right, TL - top left, LR - lower right, LL - lower left
 				checkJumpTR(jlist, i, j, NULL);
 				createJumpMove(mlist, jlist);
 				checkJumpTL(jlist, i, j, NULL);
@@ -205,11 +248,18 @@ bool board::jumpsAvailable(list<move*>& mlist)
 			}
 		}
 	}
+
+	//if no jumping moves were added, return false
+	//else return true
 	if (mlist.empty())
 		return false;
 	return true;
 }
 
+//checks for jumping conditions
+//checks if the jumped point is valid and has the enemy's color
+//checks if the end point is valid and empty
+//returns true if conditions are satisfied
 bool board::jumpConditions(int xj, int yj, int xe, int ye)
 {
 	if (isValidPos(xj, yj) && isValidPos(xe, ye) && arr[xj][yj] != 'e' &&

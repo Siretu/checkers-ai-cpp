@@ -4,7 +4,7 @@
  *  Created on: Aug 15, 2013
  *      Author: Harrison
  */
-//#define NDEBUG
+
 #include <assert.h>
 #include "board.h"
 #include <fstream>
@@ -19,12 +19,21 @@ using std::string;
 using std::stringstream;
 
 //public constructors
+//---------------------------------------------------------------------------------
 board::board(): color('b')
 {
+	//sets initial piece count to 12 for each player
 	piecesCount[0] = 12;
 	piecesCount[1] = 12;
+
+	//start out with no kings
 	kingCount[0] = 0;
 	kingCount[1] = 0;
+
+	//create the start board
+	//first three rows are filled with black pieces
+	//next two rows are empty
+	//last three rows are filled with red pieces
 	for (int i = 0; i != 3; ++i)
 		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'b';
@@ -38,23 +47,34 @@ board::board(): color('b')
 
 move::~move()
 {
+	//frees the memory allocated on the heap for each jump pointer
+	//avoids double freeing of memory by keeping track of the
+	//number of times each jump was added to a moves jump list
+	//first decrements each jump's numTimes
+	//only deletes the jump if numTimes equals 0
+	//this is necessary for multiple moves utilizing the same jumps,
+	//such as in the case of branching jumps:
+	//			1
+	//		2
+	//	3		3'
+	//		4
+	// 1 -> 2 would have numTimes equal to 2 since the jump would be utilized twice,
+	//once for each move
 	for (list<jump*>::iterator it = jpoints.begin(); it != jpoints.end(); ++it)
 	{
-		//std::cout << (*it) << " 1" << std::endl;
 		--(*it)->numTimes;
 		if ((*it)->numTimes == 0)
 			delete (*it);
-		//std::cout << (*it) << " 2" << std::endl;
 	}
-	//avoids accidentally double freeing
 }
+//---------------------------------------------------------------------------------
 
-void board::modifyBoard(ifstream& fin)	//works fine
+void board::modifyBoard(ifstream& fin)
 {
 	//store it all in a list
 	//parse each line
 	//modify the board per line
-	//last line (9th line will be turn)
+	//last line, the 9th line, will be turn
 	//a sample line of input would be
 	//e b b e
 	string line;
@@ -67,15 +87,26 @@ void board::modifyBoard(ifstream& fin)	//works fine
 			ss >> arr[count][jIndex];
 		++count;
 	}
+
+	//the last line, get the current piece color's turn
+	//set color equal to it
 	getline(fin, line);
 	remove_carriage_return(line);
 	stringstream ss(line);
 	ss >> color;
+
+	//reset piece counts
 	piecesCount[0] = 0;
 	piecesCount[1] = 0;
 	kingCount[0] = 0;
 	kingCount[1] = 0;
+
+	//make sure the color is valid
 	assert(color == 'b' || color == 'r');
+
+	//increment the pieces count accordingly
+	//by iterating through the entire matrix
+	//and counting up the pieces
 	for (int i = 0; i != 8; i++)
 		for (int j =0; j != 4; j++)
 		{
