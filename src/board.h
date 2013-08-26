@@ -114,6 +114,10 @@ class board
 	static bool isComputer[2];
 
 
+	//reset the board after game over
+	//found in board.cpp
+	void reset();
+
 	//
 	//
 	//functions for jumps: found in boardJumps.cpp

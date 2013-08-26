@@ -18,6 +18,8 @@ using std::list;
 using std::string;
 using std::stringstream;
 
+bool board::isComputer[2];
+
 //public constructors
 //---------------------------------------------------------------------------------
 board::board(): color('b')
@@ -90,6 +92,32 @@ move::~move()
 }
 //---------------------------------------------------------------------------------
 
+//resets the board, called by printEBoard in boardPublic.cpp
+//same as constructor except it also calls whoComputer, which is found in boardPrint.cpp
+void board::reset()
+{
+	//sets initial piece count to 12 for each player
+	piecesCount[0] = 12;
+	piecesCount[1] = 12;
+
+	//start out with no kings
+	kingCount[0] = 0;
+	kingCount[1] = 0;
+
+	//create the start board
+	//first three rows are filled with black pieces
+	//next two rows are empty
+	//last three rows are filled with red pieces
+	for (int i = 0; i != 3; ++i)
+		for (int j = 0; j != 4; ++j)
+			arr[i][j] = 'b';
+	for (int i = 3; i != 5; ++i)
+		for (int j = 0; j != 4; ++j)
+			arr[i][j] = 'e';
+	for (int i = 5; i != 8; ++i)
+		for (int j = 0; j != 4; ++j)
+			arr[i][j] = 'r';
+}
 void board::modifyBoard(ifstream& fin)
 {
 	//store it all in a list

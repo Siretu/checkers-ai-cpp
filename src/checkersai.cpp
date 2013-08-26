@@ -18,13 +18,18 @@ int main()
 	//cout << "Hello World!" << endl;
 	board b;
 	//list<move*> m;
-	//ifstream fin("testfile2.txt");
-	//b.modifyBoard(fin);
+	ifstream fin("testfile2.txt");
+	b.modifyBoard(fin);
+	//b.startup();
 	b.terminalTest();
 	b.printEBoard();
-	board ba(b);
+	b.terminalTest();
+	b.printEBoard();
+	b.terminalTest();
+	b.printEBoard();
+	/*board ba(b);
 	ba.terminalTest();
-	ba.printEBoard();
+	ba.printEBoard();*/
 	/*list<move*>::iterator it = m.begin();
 	for (; it != m.end(); it++)
 		cout << (*it)->command << endl;*/

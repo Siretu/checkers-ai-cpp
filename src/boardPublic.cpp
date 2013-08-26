@@ -95,50 +95,6 @@ void board::makeMove(move* m)
 	changeTurn();
 }
 
-//print the board
-//called by printEBoard
-void board::printBoard()
-{
-	cout << "Current board:" << endl;
-	cout << endl;
-	cout << "Player 1 is ";
-	printcolor('b');
-	cout << " (normal piece) and ";
-	printcolor('B');
-	cout << " (king)" << endl;
-	cout << "Player 2 is ";
-	printcolor('r');
-	cout << " (normal piece) and ";
-	printcolor('R');
-	cout <<	" (king)" << endl;
-	int count = 0;
-	cout << "    " << count;
-	++count;
-	while (count != 8)
-	{
-		cout << "   " << count++;
-	}
-	cout << " " << endl;
-
-	//padded 4 spaces in front
-	//then first number
-	//then 3 spaces
-	//last number is followed by 1 space and end line
-	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";		//padded 3 spaces
-	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";		//padded 6 spaces
-	string linebreak = "   -------------------------------";	//padded 3 spaces
-
-	//print the board
-	for (int i = 0; i != 8; ++i)
-	{
-		printline(i, lineEven, lineOdd);
-		if (i != 7)
-			cout << linebreak << endl;
-	}
-
-	//output a blank line before outputting moves
-	cout << endl;
-}
 /*
 void board::startup()		//determines whether or not players will be a computer calls modifyBoard
 {

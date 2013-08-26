@@ -113,6 +113,50 @@ void board::inputCommand()
 	makeMove(*it);
 }
 
+//print the board
+//called by printEBoard
+void board::printBoard()
+{
+	cout << "Current board:" << endl;
+	cout << endl;
+	cout << "Player 1 is ";
+	printcolor('b');
+	cout << " (normal piece) and ";
+	printcolor('B');
+	cout << " (king)" << endl;
+	cout << "Player 2 is ";
+	printcolor('r');
+	cout << " (normal piece) and ";
+	printcolor('R');
+	cout <<	" (king)" << endl;
+	int count = 0;
+	cout << "    " << count;
+	++count;
+	while (count != 8)
+	{
+		cout << "   " << count++;
+	}
+	cout << " " << endl;
+
+	//padded 4 spaces in front
+	//then first number
+	//then 3 spaces
+	//last number is followed by 1 space and end line
+	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";		//padded 3 spaces
+	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";		//padded 6 spaces
+	string linebreak = "   -------------------------------";	//padded 3 spaces
+
+	//print the board
+	for (int i = 0; i != 8; ++i)
+	{
+		printline(i, lineEven, lineOdd);
+		if (i != 7)
+			cout << linebreak << endl;
+	}
+
+	//output a blank line before outputting moves
+	cout << endl;
+}
 //decides whose turn it is to move based on color
 //prints out all the legal moves for the current board
 void board::printMoves()
@@ -193,26 +237,43 @@ void board::printcolor(const char& c)
 	}
 }
 
-
-/*void board::whoComputer()
+//called by startup, which is found in board.h
+//prompts user to assign who is/ is not a computer
+void board::whoComputer()
 {
+	bool b = true;
 	char c = ' ';
-	while (tolower(c) != 'y' || tolower(c) != 'n')
+	while (b)
 	{
 		cout << "Will player # 1 be a computer? (Y/N):" << endl;
 		cin >> c;
+		if (tolower(c) == 'y')
+		{
+			board::isComputer[0] = true;
+			b = false;
+		}
+		else if (tolower(c) == 'n')
+		{
+			board::isComputer[0] = false;
+			b = false;
+		}
 	}
-	if (tolower(c) == 'y')
-		board::isComputer[0] = true;
-	else board::isComputer[0] = false;
+	b = true;
 	c = ' ';
-	while (tolower(c) != 'y' || tolower(c) != 'n')
+	while (b)
 	{
 		cout << "Will player # 2 be a computer? (Y/N):" << endl;
 		cin >> c;
+		if (tolower(c) == 'y')
+		{
+			board::isComputer[1] = true;
+			b = false;
+		}
+		else if (tolower(c) == 'n')
+		{
+			board::isComputer[1] = false;
+			b = false;
+		}
 	}
-	if (tolower(c) == 'y')
-		board::isComputer[1] = true;
-	else board::isComputer[1] = false;
-}*/
+}
 

@@ -116,7 +116,6 @@ void board::createJumpMove(list<jump*>& jlist)
 //(x,y) is the start point
 void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NULL)
 {
-
 	if (tolower(c) == 'b' || c == 'R')
 	{
 		if (x % 2 == 0)	//even x
