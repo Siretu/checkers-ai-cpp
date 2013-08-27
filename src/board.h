@@ -148,9 +148,6 @@ class board
 
 	void checkJumpLL(std::list<jump*>&, int, int, jump*);
 
-	//reverses a jumping move
-	void undoMove(move*);
-
 	//---------------------------------------------------------------------------------
 
 
@@ -231,10 +228,6 @@ class board
 	//called in inputCommand in boardPrint.cpp
 	void convertCommand(const std::string&);
 
-	//prints out directions and available moves
-	//need to add computer moves to it
-	void inputCommand();
-
 	//prints moves in order listed in the list
 	//called by inputCommand in boardPrint.cpp
 	void printMoves();
@@ -259,6 +252,7 @@ class board
 	//---------------------------------------------------------------------------------
 
 	//modifies who is a computer, called by startup
+	//also called by reset
 	static void whoComputer();
 
 public:
@@ -299,17 +293,34 @@ public:
 	//---------------------------------------------------------------------------------
 	//functions found in boardPublic.cpp
 	//---------------------------------------------------------------------------------
+	//determines whether or not the current turn is a computer's turn
+	//called to run alpha-beta search if necessary
+	bool isComputerTurn()
+	{
+		if (color == 'b' && isComputer[0])
+			return true;
+		if (color == 'r' && isComputer[1])
+			return true;
+		return false;
+	}
 	//prints everything necessary, calls printBoard and inputCommand
 	//also prints out a game over message if applicable
 	void printEBoard();
+
+	//prints out directions and available moves
+	//need to add computer moves to it
+	void inputCommand();
+
+	//expands and prints board
+	//called by printEBoard
+	void printBoard();
 
 	//makes the move
 	//should be used on a copy of a board when alpha-beta searching
 	void makeMove(move*);
 
-	//expands and prints board
-	//called by printEBoard
-	void printBoard();
+	//reverses a move
+	void undoMove(move*);
 
 	//Evaluation function, need to do
 	//will be implemented in alpha-beta search

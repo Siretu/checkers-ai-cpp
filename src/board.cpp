@@ -117,6 +117,7 @@ void board::reset()
 	for (int i = 5; i != 8; ++i)
 		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'r';
+	whoComputer();
 }
 void board::modifyBoard(ifstream& fin)
 {

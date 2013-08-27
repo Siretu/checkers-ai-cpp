@@ -26,14 +26,6 @@ int main()
 	b.printEBoard();
 	b.terminalTest();
 	b.printEBoard();
-	b.terminalTest();
-	b.printEBoard();
-	b.terminalTest();
-	b.printEBoard();
-	b.terminalTest();
-	b.printEBoard();
-	b.terminalTest();
-	b.printEBoard();
 	/*board ba(b);
 	ba.terminalTest();
 	ba.printEBoard();*/

@@ -272,22 +272,4 @@ bool board::jumpConditions(int xj, int yj, int xe, int ye)
 	return false;
 }
 
-//undoes a move
-void board::undoMove(move* m)
-{
-	//replaces the starting jump point only if the starting jump hasn't already been replaced
-	//iterate through its list of jumps
-	//add back all the characters that were temporarily deleted
-	if (!m->jpoints.empty())
-	{
-		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
-		{
-			arr[(*it)->xs][(*it)->ys] = 'e';
-			arr[(*it)->x][(*it)->y] = (*it)->c;
-			arr[(*it)->xend][(*it)->yend] = 'e';
-		}
-	}
 
-	//add the jumping piece in the start position of the move
-	arr[m->xi][m->yi] = m->mP;
-}

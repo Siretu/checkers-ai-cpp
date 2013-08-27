@@ -25,6 +25,8 @@ using std::tolower;
 //prints out game over message when necessary
 //need to add functionality for playing again
 //need to add functionality for computer calling alpha-beta search
+//move this functionality to the game.h header file and
+//make printBoard public
 void board::printEBoard()
 {
 	printBoard();
@@ -48,6 +50,97 @@ void board::printEBoard()
 		//searched for a total of t seconds.
 		//The chosen move is: (1,2) -> (3,4)
 	else inputCommand();
+}
+
+//functions for outputting commands
+//for humans, ask for move
+//for computer, this function will never be called
+//instead another case will run in printEBoard which is found in boardPublic.cpp
+void board::inputCommand()
+{
+	printMoves();
+	string m;
+	cout << "Enter a sequence of integers indicating a move." << endl;
+	cout << "Each set of two integers represents a position." << endl;
+	cout << "End the sequence with -1." << endl;
+	cout << "For example: 2 3 3 2 -1" << endl;
+	cout <<	"	represents (2,3) -> (3,2)" << endl;
+	cout << "Enter move: ";
+
+	//enter a command
+	//try to match the command with one in the list of moves
+	//if the end of the list is reached
+	//input command again until one is matched
+	getline(cin, m);
+	remove_carriage_return(m);
+	assert(*m.rbegin() != '\0');
+	list<move*>::iterator it = mlist.begin();
+	while (it != mlist.end())
+	{
+		if ((*it)->command == m)
+		{
+			cout << "You have chosen the move: ";
+			convertCommand((*it)->command);
+			cout << endl;
+			break;
+		}
+		++it;
+		if (it == mlist.end())
+		{
+			getline(cin, m);
+			remove_carriage_return(m);
+			assert(*m.rbegin() != '\0');
+			it = mlist.begin();
+		}
+	}
+
+	//make the move selected
+	makeMove(*it);
+}
+
+//print the board
+//called by printEBoard
+void board::printBoard()
+{
+	cout << "Current board:" << endl;
+	cout << endl;
+	cout << "Player 1 is ";
+	printcolor('b');
+	cout << " (normal piece) and ";
+	printcolor('B');
+	cout << " (king)" << endl;
+	cout << "Player 2 is ";
+	printcolor('r');
+	cout << " (normal piece) and ";
+	printcolor('R');
+	cout <<	" (king)" << endl;
+	int count = 0;
+	cout << "    " << count;
+	++count;
+	while (count != 8)
+	{
+		cout << "   " << count++;
+	}
+	cout << " " << endl;
+
+	//padded 4 spaces in front
+	//then first number
+	//then 3 spaces
+	//last number is followed by 1 space and end line
+	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";		//padded 3 spaces
+	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";		//padded 6 spaces
+	string linebreak = "   -------------------------------";	//padded 3 spaces
+
+	//print the board
+	for (int i = 0; i != 8; ++i)
+	{
+		printline(i, lineEven, lineOdd);
+		if (i != 7)
+			cout << linebreak << endl;
+	}
+
+	//output a blank line before outputting moves
+	cout << endl;
 }
 
 //makes a move
@@ -95,10 +188,34 @@ void board::makeMove(move* m)
 	changeTurn();
 }
 
-/*
+//undoes a move
+void board::undoMove(move* m)
+{
+	//replaces the starting jump point only if the starting jump hasn't already been replaced
+	//iterate through its list of jumps
+	//add back all the characters that were temporarily deleted
+	if (!m->jpoints.empty())
+	{
+		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
+		{
+			arr[(*it)->xs][(*it)->ys] = 'e';
+			arr[(*it)->x][(*it)->y] = (*it)->c;
+			arr[(*it)->xend][(*it)->yend] = 'e';
+		}
+	}
+	arr[m->xf][m->yf] = 'e';
+	//add the jumping piece in the start position of the move
+	arr[m->xi][m->yi] = m->mP;
+}
+
+void evaluate()
+{
+
+}
+
 void board::startup()		//determines whether or not players will be a computer calls modifyBoard
 {
-	board::whoComputer();
+	whoComputer();
 	char c = ' ';
 	while (tolower(c) != 'y' || tolower(c) != 'n')
 	{
@@ -118,7 +235,7 @@ void board::startup()		//determines whether or not players will be a computer ca
 	{
 		//implement timer stuff
 	}
-}*/
+}
 
 
 
