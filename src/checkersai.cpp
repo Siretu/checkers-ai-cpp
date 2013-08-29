@@ -10,28 +10,31 @@
 #include "board.h"
 #include <fstream>
 #include <list>
+#include "game.h"
 
 using namespace std;
 
 int main()
 {
+	game g;
+	g.playTheGame();
 	//cout << "Hello World!" << endl;
-	board b;
+	//board b;
 	//list<move*> m;
 	//ifstream fin("testfile2.txt");
 	//b.modifyBoard(fin);
 	//small problem with testfile2
-	for (int i = 0; i != 100; ++i)
-	{
+	//for (int i = 0; i != 100; ++i)
+	/*{
 		cout << b.evaluate() << endl;
 		b.printEBoard();
-	}
+	}*/
 
 	//b.startup();
-	b.terminalTest();
-	b.printEBoard();
-	b.terminalTest();
-	b.printEBoard();
+	//b.terminalTest();
+	//b.printEBoard();
+	//b.terminalTest();
+	//b.printEBoard();
 	/*board ba(b);
 	ba.terminalTest();
 	ba.printEBoard();*/

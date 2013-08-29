@@ -44,37 +44,6 @@ void board::convertCommand(const string& s)
 	}
 }
 
-//prints everything needed for a board
-//prints out game over message when necessary
-//need to add functionality for playing again
-//need to add functionality for computer calling alpha-beta search
-//move this functionality to the game.h header file and
-//make printBoard public
-void board::printEBoard()
-{
-	printBoard();
-	if (mlist.empty() || (color == 'b' && piecesCount[0] == 0) ||
-			(color == 'r' && piecesCount[1] == 0))
-	{
-		cout << "The game is over." << endl;
-		cout << endl;
-		if (color == 'r')
-			cout << "Player 1 wins." << endl;
-		else cout << "Player 2 wins." << endl;
-		//add functionality for playing again
-		//cout << "Do you want to play again? (Y/N):" << endl
-		//cin
-	}
-	//else if ((color == 'b' && board::isComputer[0]) || (color == 'r' && board::isComputer[1]))
-		//call a function from game for alpha beta search results
-		//cout << "The computer will make a move." << endl;
-		//results of alpha beta search
-		//ex. completed search to depth
-		//searched for a total of t seconds.
-		//The chosen move is: (1,2) -> (3,4)
-	else inputCommand();
-}
-
 //functions for outputting commands
 //for humans, ask for move
 //for computer, this function will never be called
@@ -166,6 +135,24 @@ void board::printBoard()
 	cout << endl;
 }
 
+//decides whose turn it is to move based on color
+//prints out all the legal moves for the current board
+void board::printMoves()
+{
+	if (color == 'b')
+		cout << "Player 1 to move." << endl;
+	else cout << "Player 2 to move." << endl;
+	cout << "The legal moves are:" << endl;
+	list<move*>::const_iterator it = mlist.begin();
+	for (; it != mlist.end(); ++it)
+	{
+		cout << "Move: ";
+		convertCommand((*it)->command);
+		cout << endl;
+	}
+	cout << endl;
+}
+
 //makes a move
 //if there's any jumps, they are implemented
 //pieces are erased and subtracted from the total count if necessary
@@ -254,6 +241,8 @@ int board::evaluate()
 	b *= 10000;
 	int c = (piecesCount[0] - piecesCount[1]) * 100;
 	int d = rand() % 100;
+	if (color == 'r')
+		return -(a1 - a2 + b + c + d);
 	return a1 - a2 + b + c + d;
 }
 
@@ -264,11 +253,14 @@ void board::startup()		//determines whether or not players will be a computer ca
 	if(piecesCount[0] != 12 && piecesCount[1] != 12)
 		reset();
 	whoComputer();
+	bool b = true;
 	char c = ' ';
-	while (tolower(c) != 'y' || tolower(c) != 'n')
+	while (b)
 	{
 		cout << "Do you want to load a game from a file? (Y/N):" << endl;
 		cin >> c;
+		if (tolower(c) == 'y' || tolower(c) == 'n')
+			b = false;
 	}
 	if (tolower(c) == 'y')
 	{

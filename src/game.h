@@ -38,6 +38,7 @@ class game
 	bool gameOver;	//set this to false when calling playTheGame()
 	bool reachedEnd;	//reached end of gamespace
 	void printGame();
+	void outputMessage();	//for computer's turn
 	void computerTurn();
 	time_t startTime;
 	time_t endTime;

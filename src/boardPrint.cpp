@@ -46,24 +46,6 @@ void board::convert(const int& x, const int& y, string& s)
 	 s += ' ';
 }
 
-//decides whose turn it is to move based on color
-//prints out all the legal moves for the current board
-void board::printMoves()
-{
-	if (color == 'b')
-		cout << "Player 1 to move." << endl;
-	else cout << "Player 2 to move." << endl;
-	cout << "The legal moves are:" << endl;
-	list<move*>::const_iterator it = mlist.begin();
-	for (; it != mlist.end(); ++it)
-	{
-		cout << "Move: ";
-		convertCommand((*it)->command);
-		cout << endl;
-	}
-	cout << endl;
-}
-
 //prints a line of the board
 //that does not contain any pieces
 //i.e something like: XXX|   |XXX|   |XXX|   |XXX|

@@ -212,10 +212,6 @@ class board
 		 else return (2*y);
 	}
 
-	//prints moves in order listed in the list
-	//called by inputCommand in boardPrint.cpp
-	void printMoves();
-
 	//prints out a row of the checkers board
 	//called by boardPrint in boardPublic.cpp
 	void printline(const int&, const std::string&, const std::string&);
@@ -305,17 +301,18 @@ public:
 			return true;
 		return false;
 	}
-	//prints everything necessary, calls printBoard and inputCommand
-	//also prints out a game over message if applicable
-	void printEBoard();
 
 	//prints out directions and available moves
 	//need to add computer moves to it
 	void inputCommand();
 
 	//expands and prints board
-	//called by printEBoard
 	void printBoard();
+
+	//prints moves in order listed in the list
+	//called by inputCommand in boardPrint.cpp
+	//called by game::computerTurn in game.cpp
+	void printMoves();
 
 	//makes the move
 	//should be used on a copy of a board when alpha-beta searching

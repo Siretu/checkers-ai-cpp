@@ -218,7 +218,7 @@ bool board::jumpsAvailable()
 	//copy constructor already handles move clearing
 	while (!mlist.empty())
 	{
-		cout << "Only relevant when a final move is made" << endl;
+		//cout << "Only relevant when a final move is made" << endl;
 		delete mlist.front();
 		mlist.pop_front();
 	}
