@@ -15,9 +15,6 @@
 #include <string>
 #include <windows.h>
 
-//need copy constructor for board
-//and operator= (maybe)
-
 class jump
 {
 public:
@@ -120,9 +117,9 @@ class board
 	//default initialized to false since it's a static array
 	static bool isComputer[2];
 
-
 	//reset the board after game over
 	//found in board.cpp
+	//called by startup, which is in boardPublic.cpp
 	void reset();
 
 	//
@@ -196,15 +193,6 @@ class board
 		else return false;
 	}
 
-	//change turn, called after a move is made
-	//called by makeMove, which is found in boardPublic.cpp
-	void changeTurn()
-	{
-		if (color == 'r')
-			color = 'b';
-		else
-			color = 'r';
-	}
 	//---------------------------------------------------------------------------------
 
 	//functions for printing, found in boardPrint.cpp
@@ -223,10 +211,6 @@ class board
 			 return (2*y + 1);
 		 else return (2*y);
 	}
-
-	//converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
-	//called in inputCommand in boardPrint.cpp
-	void convertCommand(const std::string&);
 
 	//prints moves in order listed in the list
 	//called by inputCommand in boardPrint.cpp
@@ -252,10 +236,12 @@ class board
 	//---------------------------------------------------------------------------------
 
 	//modifies who is a computer, called by startup
-	//also called by reset
 	static void whoComputer();
 
 public:
+
+	//timer for the computer
+	static int timeLimit;
 
 	//list of moves for the board:
 	//public so that alpha beta search can access
@@ -276,6 +262,21 @@ public:
 	//destructor deallocates memory for all the moves in mlist
 	~board();
 
+	//change turn, called after a move is made
+	//called in game.cpp by alphabeta
+	//called by makeMove, which is found in boardPublic.cpp
+	void changeTurn()
+	{
+		if (color == 'r')
+			color = 'b';
+		else
+			color = 'r';
+	}
+
+	//converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
+	//called in inputCommand in boardPrint.cpp
+	static void convertCommand(const std::string&);
+
 	//create a board from an input file:
 	//found in board.cpp
 	void modifyBoard(std::ifstream&);
@@ -283,6 +284,7 @@ public:
 
 	//create a list of moves by calling this
 	//should be called each time a new board gets created after a move is made
+	//called by evaluate, in boardPublic.cpp
 	bool terminalTest()
 	{
 		if (!movesAvailable() || (color == 'b' && piecesCount[0] == 0) ||
@@ -324,7 +326,7 @@ public:
 
 	//Evaluation function, need to do
 	//will be implemented in alpha-beta search
-	void evaluate();
+	int evaluate();
 
 	//determines whether or not players will be a computer calls modifyBoard
 	void startup();

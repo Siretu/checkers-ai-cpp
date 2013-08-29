@@ -9,12 +9,50 @@
 #define GAME_H_
 
 #include "board.h"
+#include "time.h"
+
+template <class T>
+class sptr
+{
+private:
+	T* pData;
+public:
+	sptr(T* pVal): pData(pVal) {}
+	~sptr()	{delete pData;}
+	T& operator*() {return *pData;}
+	T* operator->() {return pData;}
+};
 
 class game
 {
 	//black shall be max
 	//red shall be min
-	board* currentB;
+	sptr<board> currentB;
+
+	//maximum search depth
+	move* bestM;
+	int maxIterDepth;
+	int maxdepth;
+	int cdepth;		//current depth
+	bool timeUp;
+	bool gameOver;	//set this to false when calling playTheGame()
+	bool reachedEnd;	//reached end of gamespace
+	void printGame();
+	void computerTurn();
+	time_t startTime;
+	time_t endTime;
+	int alphabeta(sptr<board>&, int, int, int);
+	void endMessage();
+
+	//modifies max depth based on time left
+	void modifyMaxIterDepth();
+
+public:
+
+	game();
+	void playTheGame(); //calls startup
+
+
 
 	//int alphabeta(POSITION *p, int depth, int alpha, int beta)
 	//	{
@@ -51,7 +89,7 @@ class game
 	//after each call of undoMove, call changeTurn
 	//change turn is already called in makeMove
 	//pass by pointer
-	//before return best value, delete the new board allocated
+	//before return best value, delete the new bo	ard allocated
 
 	//need a variable depth that depends on time limit
 	//incorporate time limit too

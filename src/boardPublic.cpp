@@ -8,9 +8,11 @@
 #include <assert.h>
 #include "board.h"
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <limits>
 #include <string>
 
 using std::cin;
@@ -20,6 +22,27 @@ using std::ifstream;
 using std::list;
 using std::string;
 using std::tolower;
+
+//used to print out all available moves
+//takes a command as an argument and displays it
+//2 3 3 2 -1
+//is converted to (2, 3) -> (3, 2)
+//called by inputCommand
+void board::convertCommand(const string& s)
+{
+	string::const_iterator it = s.begin();
+	cout << "(" << (*it) << ", ";
+	it += 2;
+	cout << (*it) << ") ";
+	it += 2;
+	while (*it != '-')
+	{
+		cout << "-> (" << (*it) << ", ";
+		it += 2;
+		cout << (*it) << ") ";
+		it += 2;
+	}
+}
 
 //prints everything needed for a board
 //prints out game over message when necessary
@@ -208,13 +231,38 @@ void board::undoMove(move* m)
 	arr[m->xi][m->yi] = m->mP;
 }
 
-void evaluate()
+//black is more positive
+//red is more negative
+//aabbccdd
+//aa is a count of all pieces: king is worth a total of 3, regular pieces are 2 (black - red)
+//bb is measuring how close a normal piece is to becoming a king
+//cc is a piece count difference
+//dd is pseudo-random in the case that multiple moves tie for best
+int board::evaluate()
 {
-
+	int a1 = ((piecesCount[0] * 2) + kingCount[0]) * 1000000;
+	int a2 = ((piecesCount[1] * 2) + kingCount[1]) * 1000000;
+	int b = 0;
+	for (int i = 0; i != 8; ++i)
+		for (int j = 0; j != 4; ++j)
+		{
+			if (arr[i][j] == 'b')
+				b += i;
+			else if (arr[i][j] == 'r')
+				b -= (7 - i);
+		}
+	b *= 10000;
+	int c = (piecesCount[0] - piecesCount[1]) * 100;
+	int d = rand() % 100;
+	return a1 - a2 + b + c + d;
 }
 
 void board::startup()		//determines whether or not players will be a computer calls modifyBoard
 {
+	//only reset if necessary
+	//for example this will be called at the beginning of the game when reset isn't necessary
+	if(piecesCount[0] != 12 && piecesCount[1] != 12)
+		reset();
 	whoComputer();
 	char c = ' ';
 	while (tolower(c) != 'y' || tolower(c) != 'n')
@@ -228,12 +276,13 @@ void board::startup()		//determines whether or not players will be a computer ca
 		cout << "Enter filename: " << endl;
 		cin >> name;
 		ifstream fin(name.c_str());
-		assert(fin.good());
+		while (!fin.good())
+		{
+			cout << "Enter filename: " << endl;
+			cin >> name;
+			fin.open(name.c_str());
+		}
 		modifyBoard(fin);
-	}
-	if (board::isComputer[0] == true || board::isComputer[1] == true)
-	{
-		//implement timer stuff
 	}
 }
 

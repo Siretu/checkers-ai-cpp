@@ -92,14 +92,25 @@ bool board::listMoves()
 	//iterate through the matrix
 	//check neighboring positions
 	//if the piece matches the current turn's color
-	for (int i = 0; i!= 8; ++i)
+	if (color == 'r')
 	{
-		for (int j = 0; j != 4; ++j)
-		{
-			if (arr[i][j] == color || arr[i][j] == toupper(color))
-				checkNeighbors(i, j);
-		}
+		for (int i = 0; i!= 8; ++i)
+			for (int j = 0; j != 4; ++j)
+				if (arr[i][j] == color || arr[i][j] == toupper(color))
+					checkNeighbors(i, j);
 	}
+	//color == 'b'
+	//order this differently so that the moves are ordered so that
+	//pieces closest to being kings get checked first
+	//useful for alpha-beta
+	else
+	{
+		for (int i = 7; i!= -1; --i)
+			for (int j = 0; j != 4; ++j)
+				if (arr[i][j] == color || arr[i][j] == toupper(color))
+					checkNeighbors(i, j);
+	}
+
 
 	//if any moves are added, return true
 	//else return false

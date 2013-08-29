@@ -18,9 +18,15 @@ int main()
 	//cout << "Hello World!" << endl;
 	board b;
 	//list<move*> m;
-	ifstream fin("testfile2.txt");
+	//ifstream fin("testfile2.txt");
+	//b.modifyBoard(fin);
 	//small problem with testfile2
-	b.modifyBoard(fin);
+	for (int i = 0; i != 100; ++i)
+	{
+		cout << b.evaluate() << endl;
+		b.printEBoard();
+	}
+
 	//b.startup();
 	b.terminalTest();
 	b.printEBoard();

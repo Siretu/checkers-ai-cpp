@@ -46,27 +46,6 @@ void board::convert(const int& x, const int& y, string& s)
 	 s += ' ';
 }
 
-//used to print out all available moves
-//takes a command as an argument and displays it
-//2 3 3 2 -1
-//is converted to (2, 3) -> (3, 2)
-//called by inputCommand
-void board::convertCommand(const string& s)
-{
-	string::const_iterator it = s.begin();
-	cout << "(" << (*it) << ", ";
-	it += 2;
-	cout << (*it) << ") ";
-	it += 2;
-	while (*it != '-')
-	{
-		cout << "-> (" << (*it) << ", ";
-		it += 2;
-		cout << (*it) << ") ";
-		it += 2;
-	}
-}
-
 //decides whose turn it is to move based on color
 //prints out all the legal moves for the current board
 void board::printMoves()
@@ -184,6 +163,13 @@ void board::whoComputer()
 			board::isComputer[1] = false;
 			b = false;
 		}
+	}
+	if (board::isComputer[0] == true || board::isComputer[1] == true)
+	{
+		cout << "Enter a time limit for the computer in seconds (3-60):" << endl;
+		cin >> timeLimit;
+		if (timeLimit > 60 || timeLimit < 3)
+			cin >> timeLimit;
 	}
 }
 
