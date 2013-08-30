@@ -242,7 +242,7 @@ int board::evaluate()
 	int c = (piecesCount[0] - piecesCount[1]) * 100;
 	int d = rand() % 100;
 	if (color == 'r')
-		return -(a1 - a2 + b + c + d);
+		d = -d;
 	return a1 - a2 + b + c + d;
 }
 
@@ -254,10 +254,10 @@ void board::startup()		//determines whether or not players will be a computer ca
 		reset();
 	whoComputer();
 	bool b = true;
+	cout << "Do you want to load a game from a file? (Y/N):" << endl;
 	char c = ' ';
 	while (b)
 	{
-		cout << "Do you want to load a game from a file? (Y/N):" << endl;
 		cin >> c;
 		if (tolower(c) == 'y' || tolower(c) == 'n')
 			b = false;

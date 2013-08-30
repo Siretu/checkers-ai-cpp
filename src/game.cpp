@@ -5,6 +5,7 @@
  *      Author: Harrison
  */
 
+#include <assert.h>
 #include <algorithm>
 #include <cctype>
 #include <iostream>
@@ -21,7 +22,7 @@ using std::endl;
 using std::max;
 using std::list;
 
-game::game(): currentB(sptr<board>(new board())), bestM(NULL), maxIterDepth(30), maxdepth(0),
+game::game(): currentB(sptr<board>(new board())), bestM(NULL), tempBestM(NULL), maxIterDepth(20), maxdepth(0),
 		cdepth(0), timeUp(false), gameOver(false), reachedEnd(false), startTime(0), endTime(0) {}
 
 void game::playTheGame()
@@ -34,6 +35,7 @@ void game::playTheGame()
 
 void game::endMessage()
 {
+	gameOver = true;
 	cout << "The game is over." << endl;
 	cout << endl;
 	if (currentB->getTurn() == 'r')
@@ -62,11 +64,7 @@ void game::endMessage()
 
 void game::computerTurn()
 {
-	if (currentB->terminalTest())
-	{
-		endMessage();
-		return;
-	}
+	//end game taken care of in printGame
 	currentB->printMoves();
 	cout << "The computer will make a move." << endl;
 	if (currentB->mlist.size() == 1)
@@ -75,21 +73,24 @@ void game::computerTurn()
 		time(&startTime);
 		time(&endTime);
 		cdepth = 0;
-		outputMessage();
-		return;
 	}
-	time(&startTime);
-	for (int i = 0; i != maxIterDepth; ++i)
-	{
-		maxdepth = i;
-		alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-		if (gameOver || timeUp)
-			break;
-	}
-	if (!gameOver)
-		outputMessage();
 	else
-		endMessage();
+	{
+		time(&startTime);
+		for (int i = 1; i != maxIterDepth; ++i)
+		{
+			maxdepth = i;
+			alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+			//assert(bestM != NULL);
+			//cout << bestM->command << endl;
+			if (timeUp)
+				break;
+			else
+				bestM = tempBestM;
+		}
+	}
+	assert(bestM != NULL);
+	outputMessage();
 }
 
 void game::outputMessage()
@@ -103,15 +104,18 @@ void game::outputMessage()
 	board::convertCommand(bestM->command);
 	cout << endl;
 	bestM = NULL;
+	tempBestM = NULL;
 	timeUp = false;
+	reachedEnd = false;
 }
+
 void game::printGame()
 {
 	currentB->printBoard();
-	if (currentB->isComputerTurn())
-		computerTurn();
-	else if (currentB->terminalTest())
+	if (currentB->terminalTest())
 		endMessage();
+	else if (currentB->isComputerTurn())
+		computerTurn();
 	else
 		currentB->inputCommand();
 }
@@ -127,49 +131,73 @@ void game::printGame()
 //implement timer
 //save the best move??
 
-//need to debug a lot
-//time spent searching???
-//fix the algorithm to play better!!!!
-//utilize reached end
 int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 {
-
-	//char turn = b->getTurn();
-	if (b->terminalTest() && depth != maxdepth)
-		return std::numeric_limits<int>::min();
+	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0
+	{
+		//b->printBoard();
+		reachedEnd = true;
+		if (b->getTurn() == 'r')
+			return std::numeric_limits<int>::max();
+		else return std::numeric_limits<int>::min();
+	}
 	if (depth == 0)
 		return b->evaluate();
-	int localalpha = alpha;
-	int bestvalue = std::numeric_limits<int>::min();
 	list<move*>::iterator iter = b->mlist.begin();
-	//cout << "works up to here" << endl;
-	for (; iter != b->mlist.end(); ++iter)
+	if (b->getTurn() == 'b')
 	{
-		time(&endTime);
-		if (difftime(endTime, startTime) >= (board::timeLimit - 1))
+		for (; iter != b->mlist.end(); ++iter)
 		{
-			timeUp = true;
-			break;
+			time(&endTime);
+			if (difftime(endTime, startTime) >= (board::timeLimit - 1))
+			{
+				timeUp = true;
+				break;
+			}
+			b->makeMove(*iter);
+			sptr<board> newB(new board(*b));
+			int value = alphabeta(newB, depth-1, alpha, beta);
+			b->undoMove(*iter);
+			b->changeTurn();
+			if (value > alpha)	//found best move
+			{
+				alpha = value;
+				if (depth == maxdepth)
+					tempBestM = (*iter);
+			}
+			if (alpha >= beta)	//cut off
+				return alpha;
 		}
-		b->makeMove(*iter);
-		//cout << "works here too" << depth << endl;
-		sptr<board> newB(new board(*b));
-		int value = -alphabeta(newB, depth-1, -beta, -localalpha);
-		b->undoMove(*iter);
-		b->changeTurn();
-		bestvalue = max(value, bestvalue);
-		if (bestvalue >= beta)
-			break;
-		if (bestvalue > localalpha)
-		{
-			localalpha = bestvalue;
-			if (depth == maxdepth)
-				bestM = (*iter);
-		}
-		//need to set bestM to something here
+		if (!timeUp && depth == maxdepth)
+			cdepth = depth;
+		return alpha;
 	}
-	if (!timeUp && depth == maxdepth)
-		cdepth = depth;
-	//fix here, somehow make it return the best move
-	return bestvalue;
+	else // turn = 'r'
+	{
+		for (; iter != b->mlist.end(); ++iter)
+		{
+			time(&endTime);
+			if (difftime(endTime, startTime) >= (board::timeLimit - 1))
+			{
+				timeUp = true;
+				break;
+			}
+			b->makeMove(*iter);
+			sptr<board> newB(new board(*b));
+			int value = alphabeta(newB, depth-1, alpha, beta);
+			b->undoMove(*iter);
+			b->changeTurn();
+			if (value < beta)	//found best move
+			{
+				beta = value;
+				if (depth == maxdepth)
+					tempBestM = (*iter);
+			}
+			if (alpha >= beta)	//cut off
+				return beta;
+		}
+		if (!timeUp && depth == maxdepth)
+			cdepth = depth;
+		return beta;
+	}
 }

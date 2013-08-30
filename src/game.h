@@ -30,7 +30,8 @@ class game
 	sptr<board> currentB;
 
 	//maximum search depth
-	move* bestM;
+	move* bestM;		//best move from last alpha beta
+	move* tempBestM;	//temporary best move for current alpha-beta
 	int maxIterDepth;
 	int maxdepth;
 	int cdepth;		//current depth
