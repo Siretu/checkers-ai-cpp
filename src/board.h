@@ -250,13 +250,13 @@ public:
 	//constructor for initializing an initial board
 	board();
 
+	//destructor deallocates memory for all the moves in mlist
+	~board();
+
 	//copy constructor
 	//copies over all data values except the move list
 	//useful for creating new boards for each move in alpha-beta search
 	board(const board&);
-
-	//destructor deallocates memory for all the moves in mlist
-	~board();
 
 	//change turn, called after a move is made
 	//called in game.cpp by alphabeta
@@ -327,8 +327,8 @@ public:
 
 	//determines whether or not players will be a computer calls modifyBoard
 	void startup();
-	//NEED TO IMPLEMENT TIMER STUFF
 
+	//gets the current color's turn
 	char getTurn() {return color;}
 };
 

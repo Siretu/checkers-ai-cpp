@@ -30,6 +30,7 @@ board::board()
 	reset();
 }
 
+//destructor deallocates memory for all the moves in mlist
 board::~board()
 {
 	while (!mlist.empty())
@@ -39,6 +40,9 @@ board::~board()
 	}
 }
 
+//copy constructor
+//copies over all data values except the move list
+//useful for creating new boards for each move in alpha-beta search
 board::board(const board& b): color(b.color)
 {
 	for (int i = 0; i != 8; ++i)

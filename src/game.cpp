@@ -25,6 +25,7 @@ using std::list;
 //highly unlikely to be able to search to depth 20 within maximum time limit
 const int game::maxIterDepth = 20;
 
+//game's constructor
 game::game(): currentB(sptr<board>(new board())), bestM(NULL), tempBestM(NULL), maxdepth(0),
 		cdepth(0), timeUp(false), gameOver(false), reachedEnd(false), startTime(0), endTime(0) {}
 
@@ -75,9 +76,13 @@ void game::endMessage()
 //prints out depth searched to, time searching, and move made afterwards through outputMessage
 void game::computerTurn()
 {
-	//end game taken care of in printGame
+	//moves for current board are already created in printGame function
+	//game over scenario also taken care of in printGame
 	currentB->printMoves();
 	cout << "The computer will make a move." << endl;
+
+	//if there's only one move to make, make it immediately
+	//this may occur for jump moves
 	if (currentB->mlist.size() == 1)
 	{
 		bestM = currentB->mlist.front();
@@ -87,22 +92,31 @@ void game::computerTurn()
 	}
 	else
 	{
+		//start the timer for the search
 		time(&startTime);
 		for (int i = 1; i != maxIterDepth; ++i)
 		{
+			//changes maxdepth
 			maxdepth = i;
+
+			//calls alpha beta search up to depth maxdepth, with alpha = -infinity and beta = infinity
 			alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-			//assert(bestM != NULL);
-			//cout << bestM->command << endl;
+
+			//break out of loop if time's up
+			//if time isn't up, either the remaining game space has been explored
+			//or search to maxIterDepth was completed; sets bestM = tempBestM
 			if (timeUp)
 				break;
 			else
 				bestM = tempBestM;
-			if (reachedEnd)	//test if remaining gamespace is done searching, no need to go deeper/repeat
+			//test if alpha beta is done searching remaining game space, no need to go deeper/repeat
+			if (reachedEnd)
 				break;
 		}
 	}
 	assert(bestM != NULL);
+
+	//output appropriate message for computer's search results
 	outputMessage();
 }
 
@@ -118,13 +132,18 @@ void game::outputMessage()
 	cout << "The chosen move is: ";
 	board::convertCommand(bestM->command);
 	cout << endl;
+
+	//resets everything used for next alpha-beta search
 	bestM = NULL;
 	tempBestM = NULL;
 	timeUp = false;
 	reachedEnd = false;
 }
 
-//prints the game board and
+//prints the game board
+//outputs game over message if necessary;
+//generates moves for current player's turn if there are any
+//if the game has not ended, it
 //makes the computer make a move
 //or prompts user to make a move
 void game::printGame()
@@ -138,20 +157,6 @@ void game::printGame()
 		currentB->inputCommand();
 }
 
-/*
- * The computer will make a move.
- * Completed search to depth _
- * Out of time searching to depth (next depth)
- * Searched for a total of t seconds
- * The chosen move is: (move)
- */
-//start at max depth work toward 0
-//almost done with this
-//implement timer
-//save the best move??
-
-//fix endgame stuff (especially utilizing testfile3)
-//debug this!!!
 int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 {
 	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0
@@ -167,36 +172,65 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 	if (depth == 0)
 		return b->evaluate();
 	list<move*>::iterator iter = b->mlist.begin();
+
+	//max's turn
 	if (b->getTurn() == 'b')
 	{
 		for (; iter != b->mlist.end(); ++iter)
 		{
+			//update the end time
 			time(&endTime);
+
+			//check if time's up
+			//if it is, break out of the loop
 			if (difftime(endTime, startTime) >= (board::timeLimit - 1))
 			{
 				timeUp = true;
 				break;
 			}
+
+			//make the move
+			//create a new board using the copy constructor
+			//the move has been made for the new board
+			//and pass it as a parameter to alpha beta,
+			//along with depth reduced by one
+			//undo the move and revert the turn
+			//this is because undoMove doesn't change turn
 			b->makeMove(*iter);
 			sptr<board> newB(new board(*b));
 			int value = alphabeta(newB, depth-1, alpha, beta);
 			b->undoMove(*iter);
 			b->changeTurn();
-			if (value > alpha)	//found best move
+
+			//found best move
+			if (value > alpha)
 			{
 				alpha = value;
 				if (depth == maxdepth)
 					tempBestM = (*iter);
 			}
-			if (alpha >= beta)	//cut off
+
+			//cut off
+			if (alpha >= beta)
 				return alpha;
 		}
+
+		//search has been completed to depth = maxdepth
+		//update cdepth to be equal to maxdepth
 		if (!timeUp && depth == maxdepth)
 			cdepth = depth;
-		//cout << alpha << endl;
+
+		//this is max's best move
 		return alpha;
 	}
-	else // turn = 'r'
+
+	// turn = 'r'
+	//min's turn
+	//almost identical to max's
+	//returns beta instead of alpha
+	//tests value < beta instead of if value > alpha
+	//for finding best move
+	else
 	{
 		for (; iter != b->mlist.end(); ++iter)
 		{
@@ -211,20 +245,26 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			int value = alphabeta(newB, depth-1, alpha, beta);
 			b->undoMove(*iter);
 			b->changeTurn();
-			if (value < beta)	//found best move
+
+			//found best move for min
+			if (value < beta)
 			{
-				//cout << "this is beta: " << value << endl;
-				//cout << (*iter)->command << endl;
 				beta = value;
 				if (depth == maxdepth)
 					tempBestM = (*iter);
 			}
-			if (alpha >= beta)	//cut off
+
+			//cut off
+			if (alpha >= beta)
 				return beta;
 		}
+
+		//search has been completed to depth = maxdepth
+		//update cdepth to be equal to maxdepth
 		if (!timeUp && depth == maxdepth)
 			cdepth = depth;
-		//cout << beta << endl;
+
+		//this is min's best move
 		return beta;
 	}
 }

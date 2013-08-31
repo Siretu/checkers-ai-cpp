@@ -246,7 +246,8 @@ int board::evaluate()
 	return a1 - a2 + b + c + d;
 }
 
-void board::startup()		//determines whether or not players will be a computer calls modifyBoard
+//determines whether or not players will be a computer calls modifyBoard
+void board::startup()
 {
 	//only reset if necessary
 	//for example this will be called at the beginning of the game when reset isn't necessary
