@@ -22,9 +22,13 @@ using std::endl;
 using std::max;
 using std::list;
 
-game::game(): currentB(sptr<board>(new board())), bestM(NULL), tempBestM(NULL), maxIterDepth(20), maxdepth(0),
+//highly unlikely to be able to search to depth 20 within maximum time limit
+const int game::maxIterDepth = 20;
+
+game::game(): currentB(sptr<board>(new board())), bestM(NULL), tempBestM(NULL), maxdepth(0),
 		cdepth(0), timeUp(false), gameOver(false), reachedEnd(false), startTime(0), endTime(0) {}
 
+//generates more turns and starts up the game
 void game::playTheGame()
 {
 	gameOver = false;
@@ -33,6 +37,9 @@ void game::playTheGame()
 		printGame();
 }
 
+//message for game over
+//prompts user to play again or not
+//calls playTheGame if answer is yes
 void game::endMessage()
 {
 	gameOver = true;
@@ -62,6 +69,10 @@ void game::endMessage()
 	}
 }
 
+//computer's turn
+//calls alpha beta search
+//if there's only one available move, makes that move immediately
+//prints out depth searched to, time searching, and move made afterwards through outputMessage
 void game::computerTurn()
 {
 	//end game taken care of in printGame
@@ -87,12 +98,16 @@ void game::computerTurn()
 				break;
 			else
 				bestM = tempBestM;
+			if (reachedEnd)	//test if remaining gamespace is done searching, no need to go deeper/repeat
+				break;
 		}
 	}
 	assert(bestM != NULL);
 	outputMessage();
 }
 
+//prints out computer's move
+//also resets bestM, tempBestM, timeUp, and reachedEnd
 void game::outputMessage()
 {
 	currentB->makeMove(bestM);
@@ -109,6 +124,9 @@ void game::outputMessage()
 	reachedEnd = false;
 }
 
+//prints the game board and
+//makes the computer make a move
+//or prompts user to make a move
 void game::printGame()
 {
 	currentB->printBoard();
@@ -119,6 +137,7 @@ void game::printGame()
 	else
 		currentB->inputCommand();
 }
+
 /*
  * The computer will make a move.
  * Completed search to depth _
@@ -131,16 +150,20 @@ void game::printGame()
 //implement timer
 //save the best move??
 
+//fix endgame stuff (especially utilizing testfile3)
+//debug this!!!
 int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 {
 	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0
 	{
 		//b->printBoard();
-		reachedEnd = true;
+		reachedEnd = true;	//set reached end as true
+		cdepth = maxdepth;
 		if (b->getTurn() == 'r')
 			return std::numeric_limits<int>::max();
 		else return std::numeric_limits<int>::min();
 	}
+	reachedEnd = false;	//set reached end as false, means that remaining game space still isn't fully explored
 	if (depth == 0)
 		return b->evaluate();
 	list<move*>::iterator iter = b->mlist.begin();
@@ -170,6 +193,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 		}
 		if (!timeUp && depth == maxdepth)
 			cdepth = depth;
+		//cout << alpha << endl;
 		return alpha;
 	}
 	else // turn = 'r'
@@ -189,6 +213,8 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			b->changeTurn();
 			if (value < beta)	//found best move
 			{
+				//cout << "this is beta: " << value << endl;
+				//cout << (*iter)->command << endl;
 				beta = value;
 				if (depth == maxdepth)
 					tempBestM = (*iter);
@@ -198,6 +224,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 		}
 		if (!timeUp && depth == maxdepth)
 			cdepth = depth;
+		//cout << beta << endl;
 		return beta;
 	}
 }
