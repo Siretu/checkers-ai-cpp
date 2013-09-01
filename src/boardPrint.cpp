@@ -10,7 +10,6 @@
 #include <iostream>
 #include <list>
 #include <string>
-//#include <windows.h>
 
 using std::endl;
 using std::cin;
@@ -86,19 +85,24 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 }
 
 //function for printing a character in a different color in windows
+//to print out a color character
 void board::printcolor(const char& c)
 {
 	if (c == 'e')
 		cout << ' ';
-	else if (c == 'r' || c == 'R')	//sets piece as red color
+	else if (c == 'r' || c == 'R')	//sets piece as magenta color
 	{
-		//system("color 04");
-		cout << c;
+		string default_console = "\033[0m";
+		string color = "\033[1;35m";
+		cout << color << c;
+		cout << default_console;
 	}
-	else	//c is 'b' or 'B', sets pieces as green color
+	else	//c is 'b' or 'B', sets pieces as cyan color
 	{
-		//system("color 02");
-		cout << c;
+		string default_console = "\033[0m";
+		string color = "\033[1;36m";
+		cout << color << c;
+		cout << default_console;
 	}
 }
 
