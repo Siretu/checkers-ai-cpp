@@ -157,6 +157,8 @@ void game::printGame()
 		currentB->inputCommand();
 }
 
+//fail-hard alpha beta
+//returns alpha / beta instead of value
 int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 {
 	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0

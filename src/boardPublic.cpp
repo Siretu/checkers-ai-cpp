@@ -210,6 +210,21 @@ void board::undoMove(move* m)
 		{
 			arr[(*it)->xs][(*it)->ys] = 'e';
 			arr[(*it)->x][(*it)->y] = (*it)->c;
+			if ((*it)->c == 'b')
+				++piecesCount[0];
+			else if ((*it)->c == 'r')
+				++piecesCount[1];
+			else if ((*it)->c == 'B')
+			{
+				++piecesCount[0];
+				++kingCount[0];
+			}
+			//(*it)->c == 'R'
+			else
+			{
+				++piecesCount[0];
+				++kingCount[0];
+			}
 			arr[(*it)->xend][(*it)->yend] = 'e';
 		}
 	}
