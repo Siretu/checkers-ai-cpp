@@ -13,7 +13,6 @@
 #include <iostream>
 #include <list>
 #include <string>
-#include <windows.h>
 
 class jump
 {
@@ -216,19 +215,8 @@ class board
 	//called by boardPrint in boardPublic.cpp
 	void printline(const int&, const std::string&, const std::string&);
 
-	//functions for printing lines and color characters in windows
+	//change text color for red and black pieces
 	void printcolor(const char&);
-	//change text color
-	//found at http://msdn.microsoft.com/en-us/library/ms682088(VS.85).aspx#_win32_character_attributes
-	//code for changing color found at http://www.cplusplus.com/forum/beginner/1640/
-	//does not work in console, will work in executable
-
-	WORD GetConsoleTextAttribute (HANDLE hCon)
-	{
-	  CONSOLE_SCREEN_BUFFER_INFO con_info;
-	  GetConsoleScreenBufferInfo(hCon, &con_info);
-	  return con_info.wAttributes;
-	}
 	//---------------------------------------------------------------------------------
 
 	//modifies who is a computer, called by startup

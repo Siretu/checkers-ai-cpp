@@ -10,7 +10,7 @@
 #include <iostream>
 #include <list>
 #include <string>
-#include <windows.h>
+//#include <windows.h>
 
 using std::endl;
 using std::cin;
@@ -92,19 +92,13 @@ void board::printcolor(const char& c)
 		cout << ' ';
 	else if (c == 'r' || c == 'R')	//sets piece as red color
 	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+		//system("color 04");
 		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
 	}
 	else	//c is 'b' or 'B', sets pieces as green color
 	{
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		const int saved_colors = GetConsoleTextAttribute(hConsole);
-		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		//system("color 02");
 		cout << c;
-		SetConsoleTextAttribute(hConsole, saved_colors);
 	}
 }
 
