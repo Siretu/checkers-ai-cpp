@@ -84,21 +84,24 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 	}
 }
 
-//function for printing a character in a different color in windows
-//to print out a color character
+//function for printing a character in a different color
+//uses escape sequences to print out a color character
+//resource used: http://en.wikipedia.org/wiki/ANSI_escape_code
 void board::printcolor(const char& c)
 {
 	if (c == 'e')
 		cout << ' ';
-	else if (c == 'r' || c == 'R')	//sets piece as magenta color
+	else if (c == 'r' || c == 'R')
 	{
+		//sets piece as magenta color
 		string default_console = "\033[0m";
 		string color = "\033[1;35m";
 		cout << color << c;
 		cout << default_console;
 	}
-	else	//c is 'b' or 'B', sets pieces as cyan color
+	else
 	{
+		//c is 'b' or 'B', sets pieces as cyan color
 		string default_console = "\033[0m";
 		string color = "\033[1;36m";
 		cout << color << c;
