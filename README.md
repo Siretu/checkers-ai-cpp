@@ -28,6 +28,3 @@ squares are legal game spaces. R denotes a red king. B denotes a black king. r a
 normal pieces respectively. 'e' represents empty spaces. The 9th line of the input file must be either 
 'r' or 'b' to denote whose turn it will be. The program uses escape sequences to print text in color.
 Red pieces get printed in magenta and black pieces get printed in cyan.
-
-Note: This utilizes "windows.h" to format color for red and black pieces. It will only compile under windows
-unless one comments/deletes the code related to the included header.
