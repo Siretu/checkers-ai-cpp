@@ -121,6 +121,10 @@ class board
 	//called by startup, which is in boardPublic.cpp
 	void reset();
 
+	//create a board from an input file:
+	//found in board.cpp
+	void modifyBoard(std::ifstream&);
+
 	//
 	//
 	//functions for jumps: found in boardJumps.cpp
@@ -260,12 +264,7 @@ public:
 	//converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
 	//called in inputCommand in boardPrint.cpp
 	static void convertCommand(const std::string&);
-
-	//create a board from an input file:
-	//found in board.cpp
-	void modifyBoard(std::ifstream&);
 	//---------------------------------------------------------------------------------
-
 	//create a list of moves by calling this
 	//should be called each time a new board gets created after a move is made
 	//called by evaluate, in boardPublic.cpp
