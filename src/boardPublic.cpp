@@ -264,10 +264,8 @@ int board::evaluate()
 //determines whether or not players will be a computer calls modifyBoard
 void board::startup()
 {
-	//only reset if necessary
-	//for example this will be called at the beginning of the game when reset isn't necessary
-	if(piecesCount[0] != 12 && piecesCount[1] != 12)
-		reset();
+	//reset the board
+	reset();
 	whoComputer();
 	bool b = true;
 	cout << "Do you want to load a game from a file? (Y/N):" << endl;

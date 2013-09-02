@@ -98,6 +98,7 @@ void board::printcolor(const char& c)
 		string color = "\033[1;35m";
 		cout << color << c;
 		cout << default_console;
+		//cout << c;
 	}
 	else
 	{
@@ -106,6 +107,7 @@ void board::printcolor(const char& c)
 		string color = "\033[1;36m";
 		cout << color << c;
 		cout << default_console;
+		//cout << c;
 	}
 }
 
