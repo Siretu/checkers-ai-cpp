@@ -63,6 +63,7 @@ void board::inputCommand()
 	//if the end of the list is reached
 	//input command again until one is matched
 	getline(cin, m);
+	//remove_carriage_return(m);
 	list<move*>::iterator it = mlist.begin();
 	while (it != mlist.end())
 	{
@@ -217,8 +218,8 @@ void board::undoMove(move* m)
 			//(*it)->c == 'R'
 			else
 			{
-				++piecesCount[0];
-				++kingCount[0];
+				++piecesCount[1];
+				++kingCount[1];
 			}
 			arr[(*it)->xend][(*it)->yend] = 'e';
 		}

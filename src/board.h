@@ -16,7 +16,6 @@
 
 class jump
 {
-public:
 	//unique previous jump
 	//example:
 	//like in a diamond shape
@@ -63,12 +62,20 @@ public:
 	jump(char jpingp, char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
 		prev(p), jumpingPiece(jpingp), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
 		 x(xc), y(yc), xend(xe), yend(ye){}
+
+	//---------------------------------------------------------------------------------
+	//friend classes:
+	//---------------------------------------------------------------------------------
+
+	//pointers to jump are deleted in move's destructor
+	friend class move;
+
+	//board's members create jumps
+	friend class board;
 };
 
 class move
 {
-public:
-
 	//moving piece
 	char mP;
 
@@ -93,6 +100,16 @@ public:
 	//destructor for move, found in board.cpp
 	//frees all the heap allocated memory for the jumps in jpoints
 	~move();
+
+	//---------------------------------------------------------------------------------
+	//friend classes:
+	//---------------------------------------------------------------------------------
+
+	//board creates moves and it accesses many of move's members
+	friend class board;
+
+	//move's member: command is accessed in game::outputMessage()
+	friend class game;
 };
 
 class board
@@ -226,7 +243,11 @@ class board
 	//modifies who is a computer, called by startup
 	static void whoComputer();
 
-public:
+//-------------------------------------------------------------------------------------
+//
+// FUNCTIONS AND DATA MEMBERS UTILIZED DIRECTLY IN GAME.H:
+//
+//-------------------------------------------------------------------------------------
 
 	//timer for the computer
 	static int timeLimit;
@@ -317,6 +338,16 @@ public:
 
 	//gets the current color's turn
 	char getTurn() {return color;}
+
+	//---------------------------------------------------------------------------------
+	//friend classes:
+	//---------------------------------------------------------------------------------
+
+	//game accesses many of move's functions (see above divider)
+	friend class game;
+
+	//sptr is a smart pointer class that automatically manages memory for boards created on the heap
+	template <class T> friend class sptr;
 };
 
 //function for fixing strings obtained via getline
