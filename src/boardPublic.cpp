@@ -77,8 +77,6 @@ void board::inputCommand()
 		if (it == mlist.end())
 		{
 			getline(cin, m);
-			remove_carriage_return(m);
-			assert(*m.rbegin() != '\0');
 			it = mlist.begin();
 		}
 	}
