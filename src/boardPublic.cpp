@@ -58,14 +58,11 @@ void board::inputCommand()
 	cout << "For example: 2 3 3 2 -1" << endl;
 	cout <<	"	represents (2,3) -> (3,2)" << endl;
 	cout << "Enter move: ";
-
 	//enter a command
 	//try to match the command with one in the list of moves
 	//if the end of the list is reached
 	//input command again until one is matched
 	getline(cin, m);
-	remove_carriage_return(m);
-	assert(*m.rbegin() != '\0');
 	list<move*>::iterator it = mlist.begin();
 	while (it != mlist.end())
 	{
