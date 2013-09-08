@@ -91,12 +91,6 @@ class game
 	//message that prints when the game is over
 	void endMessage();
 
-	void alphabeta1(sptr<board>&, int, int, int);
-
-	int maxvalue(sptr<board>&, int, int, int);
-
-	int minvalue(sptr<board>&, int, int, int);
-
 public:
 
 	//constructor, initializes data members
