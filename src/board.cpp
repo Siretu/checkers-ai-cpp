@@ -48,11 +48,6 @@ board::board(const board& b): color(b.color)
 	for (int i = 0; i != 8; ++i)
 		for (int j = 0; j != 4; ++j)
 			arr[i][j] = b.arr[i][j];
-	for (int i = 0; i != 2; ++i)
-	{
-		piecesCount[i] = b.piecesCount[i];
-		kingCount[i] = b.kingCount[i];
-	}
 }
 
 move::~move()
@@ -83,14 +78,6 @@ move::~move()
 void board::reset()
 {
 	color = 'b';
-
-	//sets initial piece count to 12 for each player
-	piecesCount[0] = 12;
-	piecesCount[1] = 12;
-
-	//start out with no kings
-	kingCount[0] = 0;
-	kingCount[1] = 0;
 
 	//create the start board
 	//first three rows are filled with black pieces
@@ -133,36 +120,8 @@ void board::modifyBoard(ifstream& fin)
 	stringstream ss(line);
 	ss >> color;
 
-	//reset piece counts
-	piecesCount[0] = 0;
-	piecesCount[1] = 0;
-	kingCount[0] = 0;
-	kingCount[1] = 0;
-
 	//make sure the color is valid
 	assert(color == 'b' || color == 'r');
-
-	//increment the pieces count accordingly
-	//by iterating through the entire matrix
-	//and counting up the pieces
-	for (int i = 0; i != 8; i++)
-		for (int j =0; j != 4; j++)
-		{
-			if (arr[i][j] == 'b')
-				++piecesCount[0];
-			else if (arr[i][j] == 'r')
-				++piecesCount[1];
-			else if (arr[i][j] == 'B')
-			{
-				++kingCount[0];
-				++piecesCount[0];
-			}
-			else if (arr[i][j] == 'R')
-			{
-				++kingCount[1];
-				++piecesCount[1];
-			}
-		}
 }
 
 

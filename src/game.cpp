@@ -20,6 +20,7 @@ using std::cin;
 using std::cout;
 using std::endl;
 using std::max;
+using std::min;
 using std::list;
 
 //highly unlikely to be able to search to depth 20 within maximum time limit
@@ -98,7 +99,6 @@ void game::computerTurn()
 		{
 			//changes maxdepth
 			maxdepth = i;
-
 			//calls alpha beta search up to depth maxdepth, with alpha = -infinity and beta = infinity
 			alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
@@ -175,6 +175,8 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 		return b->evaluate();
 	list<move*>::iterator iter = b->mlist.begin();
 
+	int localalpha = std::numeric_limits<int>::min();
+	int localbeta = std::numeric_limits<int>::max();
 	//max's turn
 	if (b->getTurn() == 'b')
 	{
@@ -200,7 +202,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			//this is because undoMove doesn't change turn
 			b->makeMove(*iter);
 			sptr<board> newB(new board(*b));
-			int value = alphabeta(newB, depth-1, alpha, beta);
+			int value = alphabeta(newB, depth-1, alpha, min(localbeta, beta));
 			b->undoMove(*iter);
 			b->changeTurn();
 
@@ -209,11 +211,15 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			{
 				alpha = value;
 				if (depth == maxdepth)
+				{
+					cout << "alpha: " << alpha << endl;
+					cout << "move: " << (*iter)->command << endl;
 					tempBestM = (*iter);
+				}
 			}
 
 			//cut off
-			if (alpha >= beta)
+			if (alpha >= beta && depth < maxdepth - 5)
 				return alpha;
 		}
 
@@ -244,7 +250,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			}
 			b->makeMove(*iter);
 			sptr<board> newB(new board(*b));
-			int value = alphabeta(newB, depth-1, alpha, beta);
+			int value = alphabeta(newB, depth-1, max(localalpha, alpha), beta);
 			b->undoMove(*iter);
 			b->changeTurn();
 
@@ -253,7 +259,11 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			{
 				beta = value;
 				if (depth == maxdepth)
+				{
+					cout << "beta: " << beta << endl;
+					cout << "move: " << (*iter)->command << endl;
 					tempBestM = (*iter);
+				}
 			}
 
 			//cut off
@@ -270,3 +280,125 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 		return beta;
 	}
 }
+
+void game::alphabeta1(sptr<board>& b, int depth, int alpha, int beta)
+{
+if (b->getTurn() == 'b')
+	maxvalue(b, maxdepth, alpha, beta);
+else minvalue(b, maxdepth, alpha, beta);
+	//cout << maxvalue(b, maxdepth, alpha, beta) << endl;
+}
+
+int game::maxvalue(sptr<board>& b, int depth, int alpha, int beta)
+{
+	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0
+	{
+		//b->printBoard();
+		reachedEnd = true;	//set reached end as true
+		cdepth = maxdepth;
+		if (b->getTurn() == 'r')
+			return std::numeric_limits<int>::max();
+		else return std::numeric_limits<int>::min();
+	}
+	reachedEnd = false;	//set reached end as false, means that remaining game space still isn't fully explored
+	if (depth == 0)
+	{
+		if (currentB->color == 'b')
+			return b->evaluate();
+		else return -b->evaluate();
+	}
+	list<move*>::iterator iter = b->mlist.begin();
+	int value = std::numeric_limits<int>::min();
+	for (; iter != b->mlist.end(); ++iter)
+	{
+		time(&endTime);
+		if (difftime(endTime, startTime) >= (board::timeLimit - 1))
+		{
+			timeUp = true;
+			break;
+		}
+		b->makeMove(*iter);
+		sptr<board> newB(new board(*b));
+		value = max(value, minvalue(newB, depth-1, alpha, beta));
+		b->undoMove(*iter);
+		b->changeTurn();
+
+		//cut off
+		if (value >= beta)
+			return value;
+
+		//found best move for min
+		if (value >= alpha)
+		{
+			alpha = value;
+			if (depth == maxdepth)
+				tempBestM = (*iter);
+		}
+	}
+
+	//search has been completed to depth = maxdepth
+	//update cdepth to be equal to maxdepth
+	if (!timeUp && depth == maxdepth)
+		cdepth = depth;
+
+	//this is min's best move
+	return value;
+}
+
+int game::minvalue(sptr<board>& b, int depth, int alpha, int beta)
+{
+	if (depth != maxdepth && b->terminalTest())	//don't need to compute moves for depth 0
+	{
+		//b->printBoard();
+		reachedEnd = true;	//set reached end as true
+		cdepth = maxdepth;
+		if (b->getTurn() == 'r')
+			return std::numeric_limits<int>::max();
+		else return std::numeric_limits<int>::min();
+	}
+	reachedEnd = false;	//set reached end as false, means that remaining game space still isn't fully explored
+	if (depth == 0)
+	{
+		if (currentB->color == 'b')
+			return b->evaluate();
+		else return -b->evaluate();
+	}
+	list<move*>::iterator iter = b->mlist.begin();
+	int value = std::numeric_limits<int>::max();
+	for (; iter != b->mlist.end(); ++iter)
+	{
+		time(&endTime);
+		if (difftime(endTime, startTime) >= (board::timeLimit - 1))
+		{
+			timeUp = true;
+			break;
+		}
+		b->makeMove(*iter);
+		sptr<board> newB(new board(*b));
+		value = min(value, maxvalue(newB, depth-1, alpha, beta));
+		b->undoMove(*iter);
+		b->changeTurn();
+
+		//cut off
+		if (alpha >= value)
+			return value;
+
+		//found best move for min
+		if (value > beta)
+		{
+			beta = value;
+			if (depth == maxdepth)
+				tempBestM = (*iter);
+		}
+	}
+
+	//search has been completed to depth = maxdepth
+	//update cdepth to be equal to maxdepth
+	if (!timeUp && depth == maxdepth)
+		cdepth = depth;
+
+	//this is min's best move
+	return value;
+}
+
+

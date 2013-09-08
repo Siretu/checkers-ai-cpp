@@ -123,13 +123,6 @@ class board
 	char color;
 
 	//[0] for black, [1] for red
-	int piecesCount[2];
-
-	//[0] for black, [1] for red
-	int kingCount[2];
-	//counts are useful in an evaluation function
-
-	//[0] for black, [1] for red
 	//default initialized to false since it's a static array
 	static bool isComputer[2];
 
@@ -291,8 +284,7 @@ class board
 	//called by evaluate, in boardPublic.cpp
 	bool terminalTest()
 	{
-		if (!movesAvailable() || (color == 'b' && piecesCount[0] == 0) ||
-				(color == 'r' && piecesCount[1] == 0))
+		if (!movesAvailable())
 			return true;
 		return false;
 	}

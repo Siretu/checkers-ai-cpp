@@ -92,7 +92,7 @@ bool board::listMoves()
 	//iterate through the matrix
 	//check neighboring positions
 	//if the piece matches the current turn's color
-	if (color == 'r')
+	if (color == 'b')
 	{
 		for (int i = 0; i!= 8; ++i)
 			for (int j = 0; j != 4; ++j)

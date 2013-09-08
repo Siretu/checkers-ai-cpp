@@ -159,23 +159,7 @@ void board::makeMove(move* m)
 	{
 		list<jump*>::iterator it = m->jpoints.begin();
 		for (; it != m->jpoints.end(); ++it)
-		{
 			arr[(*it)->x][(*it)->y] = 'e';
-			if ((*it)->c == 'r')
-				--piecesCount[1];
-			else if ((*it)->c == 'b')
-				--piecesCount[0];
-			else if ((*it)->c == 'R')
-			{
-				--piecesCount[1];
-				--kingCount[1];
-			}
-			else	//(*it)->c == 'B'
-			{
-				--piecesCount[0];
-				--kingCount[0];
-			}
-		}
 	}
 
 	//save the piece
@@ -206,21 +190,6 @@ void board::undoMove(move* m)
 		{
 			arr[(*it)->xs][(*it)->ys] = 'e';
 			arr[(*it)->x][(*it)->y] = (*it)->c;
-			if ((*it)->c == 'b')
-				++piecesCount[0];
-			else if ((*it)->c == 'r')
-				++piecesCount[1];
-			else if ((*it)->c == 'B')
-			{
-				++piecesCount[0];
-				++kingCount[0];
-			}
-			//(*it)->c == 'R'
-			else
-			{
-				++piecesCount[1];
-				++kingCount[1];
-			}
 			arr[(*it)->xend][(*it)->yend] = 'e';
 		}
 	}
@@ -238,23 +207,44 @@ void board::undoMove(move* m)
 //dd is pseudo-random in the case that multiple moves tie for best
 int board::evaluate()
 {
-	int a1 = ((piecesCount[0] * 2) + kingCount[0]) * 1000000;
-	int a2 = ((piecesCount[1] * 2) + kingCount[1]) * 1000000;
+	int a1 = 0;
+	int a2 = 0;
 	int b = 0;
+	int c = 0;
 	for (int i = 0; i != 8; ++i)
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == 'b')
+			{
+				a1 += 2;
 				b += i;
+				c += 1;
+			}
 			else if (arr[i][j] == 'r')
+			{
+				a2 -=2;
 				b -= (7 - i);
+				c -= 1;
+			}
+			else if (arr[i][j] == 'B')
+			{
+				a1 += 3;
+				c += 1;
+			}
+			else if (arr[i][j] == 'R')
+			{
+				a2 -= 3;
+				c -= 1;
+			}
 		}
+	a1 *= 1000000;
+	a2 *= 1000000;
 	b *= 10000;
-	int c = (piecesCount[0] - piecesCount[1]) * 100;
+	c *= 100;
 	int d = rand() % 100;
 	if (color == 'r')
 		d = -d;
-	return a1 - a2 + b + c + d;
+	return a1 + a2 + b + c + d;
 }
 
 //determines whether or not players will be a computer calls modifyBoard
