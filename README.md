@@ -4,7 +4,7 @@ This is a checkers game using an ASCII representation for the game board.
 
 How does it work?
 ============
-The checker board is represented using a 8 x 4 matrix of characters. There is no need for 64 positions since only half 
+The checker board is represented using a 8 x 4 matrix of characters. 32 positions are needed instead of 64 positions since only half 
 of the squares are legal game spaces. This program utilizes iterative deepening and alpha-beta pruning with minimax to determine which move the computer will
 make.
 
