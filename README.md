@@ -37,3 +37,9 @@ normal pieces respectively. 'e' represents empty spaces. The 9th line of the inp
 'r' or 'b' to denote whose turn it will be. The program uses escape sequences to print text in color.
 Red pieces get printed in magenta and black pieces get printed in cyan. Don't run it in console, run it as an executable
 since the escape sequences will also be printed in console.
+
+Where is it available?
+============
+The executable is available to download here: http://www.mediafire.com/download/05c4dyng6425hiq/checkersai.exe
+Note: it is compiled under windows!
+Please read the above modes of play to load a text file into the game and for general information about the game.
