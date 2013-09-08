@@ -40,6 +40,8 @@ since the escape sequences will also be printed in console.
 
 Where is it available?
 ============
-The executable is available to download here: http://www.mediafire.com/download/05c4dyng6425hiq/checkersai.exe
-Note: it is compiled under windows!
+The executable is available to download here: 
+http://www.mediafire.com/download/05c4dyng6425hiq/checkersai.exe
+
+Note: it is compiled with cygwin for windows!
 Please read the above modes of play to load a text file into the game and for general information about the game.
