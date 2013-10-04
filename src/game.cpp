@@ -28,7 +28,8 @@ const int game::maxIterDepth = 20;
 
 //game's constructor
 game::game(): currentB(sptr<board>(new board())), bestM(NULL), tempBestM(NULL), maxdepth(0),
-		cdepth(0), timeUp(false), gameOver(false), reachedEnd(false), startTime(0), endTime(0) {}
+		cdepth(0), timeUp(false), gameOver(false), reachedEnd(false), startTime(0), endTime(0),
+		startTimeD(0), endTimeD(0) {}
 
 //generates more turns and starts up the game
 void game::playTheGame()
@@ -97,12 +98,23 @@ void game::computerTurn()
 		time(&startTime);
 		for (int i = 1; i != maxIterDepth; ++i)
 		{
+			//keep track of amount of time searched up to a specific depth
+			time(&startTimeD);
 			//changes maxdepth
 			maxdepth = i;
 
 			//calls alpha beta search up to depth maxdepth, with alpha = -infinity and beta = infinity
 			alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
+			time(&endTimeD);
+			//if the search up to a specific depth took more than half the time limit
+			//terminate the search by breaking out of the loop
+			if (difftime(endTimeD, startTimeD) >= ((board::timeLimit)/2))
+			{
+				time(&endTime);
+				timeUp = true;
+				break;
+			}
 			//break out of loop if time's up
 			//if time isn't up, either the remaining game space has been explored
 			//or search to maxIterDepth was completed; sets bestM = tempBestM
