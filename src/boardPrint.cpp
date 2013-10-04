@@ -55,31 +55,31 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 	if (i % 2 == 0)
 	{
 		cout << lineEven << endl;
-		cout << " " << i << " XXX|";
+		cout << "  " << i << " |XXXXX|";
 		for (int j = 0; j != 3; ++j)
 		{
-			cout << " ";
+			cout << "  ";
 			printcolor(arr[i][j]);
-			cout << " |XXX|";
+			cout << "  |XXXXX|";
 		}
-		cout << " ";
+		cout << "  ";
 		printcolor(arr[i][3]);
-		cout << " " << endl;;
+		cout << "  |" << endl;;
 		cout << lineEven << endl;
 	}
 	else
 	{
 		cout << lineOdd << endl;
-		cout << " " << i << " ";
+		cout << "  " << i << " |";
 		for (int j = 0; j != 3; ++j)
 		{
-			cout << " ";
+			cout << "  ";
 			printcolor(arr[i][j]);
-			cout << " |XXX|";
+			cout << "  |XXXXX|";
 		}
-		cout << " ";
+		cout << "  ";
 		printcolor(arr[i][3]);
-		cout << " |XXX" << endl;;
+		cout << "  |XXXXX|" << endl;;
 		cout << lineOdd << endl;
 	}
 }

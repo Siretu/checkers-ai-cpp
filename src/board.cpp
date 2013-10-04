@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "board.h"
 #include <fstream>
+#include <cctype>
 #include <list>
 #include <string>
 #include <sstream>
@@ -124,4 +125,50 @@ void board::modifyBoard(ifstream& fin)
 	assert(color == 'b' || color == 'r');
 }
 
+//gives a small bonus to losing player for being in a double corner
+int board::inCorner(char losing)
+{
+	int i = 0;
+	if (tolower(arr[0][0]) == losing || tolower(arr[1][0]) == losing)
+		i += 3;
+	if (tolower(arr[6][3]) == losing || tolower(arr[7][3]) == losing)
+		i += 3;
+	return i;
+}
+
+//gives a small bonus to winning player for being on a diagonal
+//will help winning player force losing player out of a corner
+int board::onDiagonal(char winning)
+{
+	int c = 0;
+	for (int j = 0; j != 4; ++j)
+	{
+		int i = 0;
+		if (j == 0)
+		{
+			for (; i != 3; ++i)
+				if (tolower(arr[i][j]) == winning)
+					++c;
+		}
+		else if (j == 1)
+		{
+			for (i = 1; i != 5; ++i)
+				if (tolower(arr[i][j]) == winning)
+					++c;
+		}
+		else if (j == 2)
+		{
+			for (i = 3; i != 8; ++i)
+				if (tolower(arr[i][j]) == winning)
+					++c;
+		}
+		else
+		{
+			for (i = 5; i != 7; ++i)
+				if (tolower(arr[i][j]) == winning)
+					++c;
+		}
+	}
+	return c;
+}
 

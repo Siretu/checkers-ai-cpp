@@ -103,11 +103,11 @@ void board::printBoard()
 	printcolor('R');
 	cout <<	" (king)" << endl;
 	int count = 0;
-	cout << "    " << count;
+	cout << "       " << count;
 	++count;
 	while (count != 8)
 	{
-		cout << "   " << count++;
+		cout << "     " << count++;
 	}
 	cout << " " << endl;
 
@@ -115,18 +115,19 @@ void board::printBoard()
 	//then first number
 	//then 3 spaces
 	//last number is followed by 1 space and end line
-	string lineEven = "   XXX|   |XXX|   |XXX|   |XXX|   ";		//padded 3 spaces
-	string lineOdd = "      |XXX|   |XXX|   |XXX|   |XXX";		//padded 6 spaces
-	string linebreak = "   -------------------------------";	//padded 3 spaces
+	string lineEven = "    |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|     |";		//padded 3 spaces
+	string lineOdd = "    |     |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|";		//padded 6 spaces
+	string linebreak = "    -------------------------------------------------";	//padded 3 spaces
 
 	//print the board
+	cout << linebreak << endl;
 	for (int i = 0; i != 8; ++i)
 	{
 		printline(i, lineEven, lineOdd);
 		if (i != 7)
 			cout << linebreak << endl;
 	}
-
+	cout << linebreak << endl;
 	//output a blank line before outputting moves
 	cout << endl;
 }
@@ -200,17 +201,15 @@ void board::undoMove(move* m)
 
 //black is more positive
 //red is more negative
-//aabbccdd
+//aabbccddee
 //aa is a count of all pieces: king is worth a total of 3, regular pieces are 2 (black - red)
 //bb is measuring how close a normal piece is to becoming a king
 //cc is a piece count difference
-//dd is pseudo-random in the case that multiple moves tie for best
+//dd is a measurement near end game, double corners add a bonus for losing player
+//ee is pseudo-random in the case that multiple moves tie for best
 int board::evaluate()
 {
-	int a1 = 0;
-	int a2 = 0;
-	int b = 0;
-	int c = 0;
+	int a1 = 0, a2 = 0, b = 0, c = 0, d = 0;
 	for (int i = 0; i != 8; ++i)
 		for (int j = 0; j != 4; ++j)
 		{
@@ -237,14 +236,27 @@ int board::evaluate()
 				c -= 1;
 			}
 		}
-	a1 *= 1000000;
-	a2 *= 1000000;
-	b *= 10000;
-	c *= 100;
-	int d = rand() % 100;
+	if (c > 0 && a2 >= -8)
+	{
+		d -= inCorner('r');
+		if (d < 0)
+			d += onDiagonal('b');
+ 	}
+	else if (c < 0 && a1 <= 8)
+	{
+		d += inCorner('b');
+		if (d > 0)
+			d -= onDiagonal('r');
+	}
+	a1 *= 100000000;
+	a2 *= 100000000;
+	b *= 1000000;
+	c *= 10000;
+	d *= 100;
+	int e = rand() % 100;
 	if (color == 'r')
-		d = -d;
-	return a1 + a2 + b + c + d;
+		e = -e;
+	return a1 + a2 + b + c + d + e;
 }
 
 //determines whether or not players will be a computer calls modifyBoard

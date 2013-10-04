@@ -115,6 +115,7 @@ class move
 class board
 {
 	//first coordinate is x, second is y
+	//x is vertical down, y is horizontal
 	//don't need an 8x8 array since only half the spaces are legal positions for pieces
 	char arr[8][4];
 
@@ -135,8 +136,18 @@ class board
 	//found in board.cpp
 	void modifyBoard(std::ifstream&);
 
-	//
-	//
+	//checks corners near end game
+	//gives points for occupying a double corner for losing player
+	//found in board.cpp
+	//called by evaluate() in boardPublic.cpp
+	int inCorner(char losing);
+
+	//checkers diagonals near endgame, gives more points for occupying diagonal
+	//if other player is in corner
+	//found in board.cpp
+	//called by evaluate() in boardPublic.cpp
+	int onDiagonal(char winning);
+
 	//functions for jumps: found in boardJumps.cpp
 	//---------------------------------------------------------------------------------
 	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
@@ -289,7 +300,7 @@ class board
 		return false;
 	}
 	//---------------------------------------------------------------------------------
-	//functions found in boardPublic.cpp
+	//functions found in boardPublic.cpp, functions called in game.cpp
 	//---------------------------------------------------------------------------------
 	//determines whether or not the current turn is a computer's turn
 	//called to run alpha-beta search if necessary
@@ -345,12 +356,10 @@ class board
 //function for fixing strings obtained via getline
 //called by modifyBoard in board.cpp
 inline void remove_carriage_return(std::string& line)
-//eliminate the \r character in a string or the \0 character
+//eliminate the \r character in a string or the \n character
 {
-    if (*line.rbegin() == '\r' || *line.rbegin() == '\0')
-    {
-        line.erase(line.length() - 1);
-    }
+    if (*line.rbegin() == '\r' || *line.rbegin() == '\n')
+    	line.erase(line.length() - 1);
 }
 
 
