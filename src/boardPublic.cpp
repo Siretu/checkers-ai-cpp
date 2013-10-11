@@ -58,12 +58,12 @@ void board::inputCommand()
 	cout << "For example: 2 3 3 2 -1" << endl;
 	cout <<	"	represents (2,3) -> (3,2)" << endl;
 	cout << "Enter move: ";
+
 	//enter a command
 	//try to match the command with one in the list of moves
 	//if the end of the list is reached
 	//input command again until one is matched
 	getline(cin, m);
-	//remove_carriage_return(m);
 	list<move*>::iterator it = mlist.begin();
 	while (it != mlist.end())
 	{
@@ -81,8 +81,6 @@ void board::inputCommand()
 			it = mlist.begin();
 		}
 	}
-
-	//make the move selected
 	makeMove(*it);
 }
 
@@ -110,14 +108,9 @@ void board::printBoard()
 		cout << "     " << count++;
 	}
 	cout << " " << endl;
-
-	//padded 4 spaces in front
-	//then first number
-	//then 3 spaces
-	//last number is followed by 1 space and end line
-	string lineEven = "    |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|     |";		//padded 3 spaces
-	string lineOdd = "    |     |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|";		//padded 6 spaces
-	string linebreak = "    -------------------------------------------------";	//padded 3 spaces
+	string lineEven = "    |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|     |";
+	string lineOdd = "    |     |XXXXX|     |XXXXX|     |XXXXX|     |XXXXX|";
+	string linebreak = "    -------------------------------------------------";
 
 	//print the board
 	cout << linebreak << endl;
@@ -128,6 +121,7 @@ void board::printBoard()
 			cout << linebreak << endl;
 	}
 	cout << linebreak << endl;
+
 	//output a blank line before outputting moves
 	cout << endl;
 }
@@ -180,11 +174,12 @@ void board::makeMove(move* m)
 }
 
 //undoes a move
+//replaces the starting jump point only if the starting jump hasn't already been replaced
+//iterate through its list of jumps
+//add back all the characters that were temporarily deleted
+//add the jumping piece in the start position of the move
 void board::undoMove(move* m)
 {
-	//replaces the starting jump point only if the starting jump hasn't already been replaced
-	//iterate through its list of jumps
-	//add back all the characters that were temporarily deleted
 	if (!m->jpoints.empty())
 	{
 		for (list<jump*>::iterator it = m->jpoints.begin(); it != m->jpoints.end(); ++it)
@@ -195,7 +190,6 @@ void board::undoMove(move* m)
 		}
 	}
 	arr[m->xf][m->yf] = 'e';
-	//add the jumping piece in the start position of the move
 	arr[m->xi][m->yi] = m->mP;
 }
 

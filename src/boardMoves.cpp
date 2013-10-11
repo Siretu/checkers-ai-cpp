@@ -60,10 +60,10 @@ void board::checkNeighbors(int& x, int& y)
 
 //creates the move given the beginning and end positions of the move
 //also creates the command associated with the move
+//check for valid positions and
+//check to make sure the adjacent piece is empty
 void board::createMove(const int& xi,const int& yi, int xf, int yf)
 {
-	//check for valid positions and
-	//check to make sure the adjacent piece is empty
 	if (isValidPos(xf, yf) && arr[xf][yf] == 'e')
 	{
 		move* m = new move(arr[xi][yi], xi, yi, xf, yf);
@@ -79,12 +79,8 @@ void board::createMove(const int& xi,const int& yi, int xf, int yf)
 //called only if jumpsAvailable returns false
 bool board::listMoves()
 {
-	//automatically clears all moves
-	//need to get rid of this block when implementing alpha-beta
-	//copy constructor already handles move clearing
 	while (!mlist.empty())
 	{
-		//cout << "Only relevant when a final move is made" << endl;
 		delete mlist.front();
 		mlist.pop_front();
 	}
@@ -111,9 +107,6 @@ bool board::listMoves()
 					checkNeighbors(i, j);
 	}
 
-
-	//if any moves are added, return true
-	//else return false
 	if (mlist.empty())
 		return false;
 	return true;

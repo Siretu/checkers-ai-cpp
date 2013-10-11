@@ -170,8 +170,6 @@ class board
 	void checkJumpLL(std::list<jump*>&, int, int, jump*);
 
 	//---------------------------------------------------------------------------------
-
-
 	//functions for regular moves, found in boardMoves.cpp
 	//---------------------------------------------------------------------------------
 	void checkNeighbors(int&, int&);
@@ -180,7 +178,6 @@ class board
 
 	bool listMoves();
 	//---------------------------------------------------------------------------------
-
 	//general functions used for moves and jumps
 	//---------------------------------------------------------------------------------
 	//called in the terminalTest function
@@ -218,7 +215,6 @@ class board
 	}
 
 	//---------------------------------------------------------------------------------
-
 	//functions for printing, found in boardPrint.cpp
 	//---------------------------------------------------------------------------------
 	//converts a point to string form and appends it to command list for a move
@@ -248,36 +244,35 @@ class board
 	static void whoComputer();
 
 //-------------------------------------------------------------------------------------
-//
 // FUNCTIONS AND DATA MEMBERS UTILIZED DIRECTLY IN GAME.H:
-//
 //-------------------------------------------------------------------------------------
 
 	//timer for the computer
 	static int timeLimit;
 
 	//list of moves for the board:
-	//public so that alpha beta search can access
-	//might make it private again and friend the alpha beta board search
-	//---------------------------------------------------------------------------------
 	std::list<move*> mlist;
+
 	//---------------------------------------------------------------------------------
 	//functions for board creation, found in board.cpp:
 	//---------------------------------------------------------------------------------
-	//constructor for initializing an initial board
+	//1: constructor for initializing an initial board
+	//2: destructor deallocates memory for all the moves in mlist
+	//3: copy constructor
+	//   copies over all data values except the move list
+	//   useful for creating new boards for each move in alpha-beta search
+	//4: changeTurn(), called after a move is made
+	//   called in game.cpp by alphabeta
+	//   called by makeMove, which is found in boardPublic.cpp
+	//5: converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
+	//   called in inputCommand in boardPrint.cpp
+	//6: create a list of moves by calling this
+	//   should be called each time a new board gets created after a move is made
+	//   called by evaluate, in boardPublic.cpp
 	board();
-
-	//destructor deallocates memory for all the moves in mlist
 	~board();
-
-	//copy constructor
-	//copies over all data values except the move list
-	//useful for creating new boards for each move in alpha-beta search
 	board(const board&);
 
-	//change turn, called after a move is made
-	//called in game.cpp by alphabeta
-	//called by makeMove, which is found in boardPublic.cpp
 	void changeTurn()
 	{
 		if (color == 'r')
@@ -286,13 +281,8 @@ class board
 			color = 'r';
 	}
 
-	//converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
-	//called in inputCommand in boardPrint.cpp
 	static void convertCommand(const std::string&);
-	//---------------------------------------------------------------------------------
-	//create a list of moves by calling this
-	//should be called each time a new board gets created after a move is made
-	//called by evaluate, in boardPublic.cpp
+
 	bool terminalTest()
 	{
 		if (!movesAvailable())
@@ -345,7 +335,6 @@ class board
 	//---------------------------------------------------------------------------------
 	//friend classes:
 	//---------------------------------------------------------------------------------
-
 	//game accesses many of move's functions (see above divider)
 	friend class game;
 
@@ -355,8 +344,8 @@ class board
 
 //function for fixing strings obtained via getline
 //called by modifyBoard in board.cpp
-inline void remove_carriage_return(std::string& line)
 //eliminate the \r character in a string or the \n character
+inline void remove_carriage_return(std::string& line)
 {
     if (*line.rbegin() == '\r' || *line.rbegin() == '\n')
     	line.erase(line.length() - 1);

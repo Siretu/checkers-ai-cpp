@@ -100,13 +100,14 @@ void game::computerTurn()
 		{
 			//keep track of amount of time searched up to a specific depth
 			time(&startTimeD);
+
 			//changes maxdepth
 			maxdepth = i;
 
 			//calls alpha beta search up to depth maxdepth, with alpha = -infinity and beta = infinity
 			alphabeta(currentB, i, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-
 			time(&endTimeD);
+
 			//if the search up to a specific depth took more than half the time limit
 			//terminate the search by breaking out of the loop
 			if (difftime(endTimeD, startTimeD) >= ((board::timeLimit)/2))
@@ -115,6 +116,7 @@ void game::computerTurn()
 				timeUp = true;
 				break;
 			}
+
 			//break out of loop if time's up
 			//if time isn't up, either the remaining game space has been explored
 			//or search to maxIterDepth was completed; sets bestM = tempBestM
@@ -122,6 +124,7 @@ void game::computerTurn()
 				break;
 			else
 				bestM = tempBestM;
+
 			//test if alpha beta is done searching remaining game space, no need to go deeper/repeat
 			if (reachedEnd)
 				break;
@@ -190,6 +193,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 
 	int localalpha = std::numeric_limits<int>::min();
 	int localbeta = std::numeric_limits<int>::max();
+
 	//max's turn
 	if (b->getTurn() == 'b')
 	{

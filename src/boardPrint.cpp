@@ -86,7 +86,6 @@ void board::printline(const int& i, const string& lineEven, const string& lineOd
 
 //function for printing a character in a different color
 //uses escape sequences to print out a color character
-//resource used: http://en.wikipedia.org/wiki/ANSI_escape_code
 void board::printcolor(const char& c)
 {
 	if (c == 'e')
@@ -98,7 +97,6 @@ void board::printcolor(const char& c)
 		string color = "\033[1;35m";
 		cout << color << c;
 		cout << default_console;
-		//cout << c;
 	}
 	else
 	{
@@ -107,7 +105,6 @@ void board::printcolor(const char& c)
 		string color = "\033[1;36m";
 		cout << color << c;
 		cout << default_console;
-		//cout << c;
 	}
 }
 

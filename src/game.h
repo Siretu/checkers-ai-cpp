@@ -76,6 +76,7 @@ class game
 	//if the most recent search took too long, it will not alpha beta search to next depth
 	time_t startTimeD;
 	time_t endTimeD;
+
 	//prints the game board and prompts user for appropriate move
 	//if it's a computer's turn, it starts the alpha-beta search and
 	//selects the computer's move

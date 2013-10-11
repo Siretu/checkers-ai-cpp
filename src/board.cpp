@@ -51,21 +51,21 @@ board::board(const board& b): color(b.color)
 			arr[i][j] = b.arr[i][j];
 }
 
+//frees the memory allocated on the heap for each jump pointer
+//avoids double freeing of memory by keeping track of the
+//number of times each jump was added to a moves jump list
+//first decrements each jump's numTimes
+//only deletes the jump if numTimes equals 0
+//this is necessary for multiple moves utilizing the same jumps,
+//such as in the case of branching jumps:
+//			1
+//		2
+//	3		3'
+//		4
+// 1 -> 2 would have numTimes equal to 2 since the jump would be utilized twice,
+//once for each move
 move::~move()
 {
-	//frees the memory allocated on the heap for each jump pointer
-	//avoids double freeing of memory by keeping track of the
-	//number of times each jump was added to a moves jump list
-	//first decrements each jump's numTimes
-	//only deletes the jump if numTimes equals 0
-	//this is necessary for multiple moves utilizing the same jumps,
-	//such as in the case of branching jumps:
-	//			1
-	//		2
-	//	3		3'
-	//		4
-	// 1 -> 2 would have numTimes equal to 2 since the jump would be utilized twice,
-	//once for each move
 	for (list<jump*>::iterator it = jpoints.begin(); it != jpoints.end(); ++it)
 	{
 		--(*it)->numTimes;
@@ -73,17 +73,15 @@ move::~move()
 			delete (*it);
 	}
 }
-//---------------------------------------------------------------------------------
 
 //resets the board, called by printEBoard in boardPublic.cpp
+//create the start board
+//first three rows are filled with black pieces
+//next two rows are empty
+//last three rows are filled with red pieces
 void board::reset()
 {
 	color = 'b';
-
-	//create the start board
-	//first three rows are filled with black pieces
-	//next two rows are empty
-	//last three rows are filled with red pieces
 	for (int i = 0; i != 3; ++i)
 		for (int j = 0; j != 4; ++j)
 			arr[i][j] = 'b';
@@ -95,14 +93,17 @@ void board::reset()
 			arr[i][j] = 'r';
 }
 
+//store it all in a list
+//parse each line
+//modify the board per line
+//last line, the 9th line, will be turn
+//a sample line of input would be
+//e b b e
+//the last line, get the current piece color's turn
+//set color equal to it
+//make sure the color is valid
 void board::modifyBoard(ifstream& fin)
 {
-	//store it all in a list
-	//parse each line
-	//modify the board per line
-	//last line, the 9th line, will be turn
-	//a sample line of input would be
-	//e b b e
 	string line;
 	int count = 0;
 	while (getline(fin, line) && count != 8)
@@ -114,14 +115,10 @@ void board::modifyBoard(ifstream& fin)
 		++count;
 	}
 
-	//the last line, get the current piece color's turn
-	//set color equal to it
 	getline(fin, line);
 	remove_carriage_return(line);
 	stringstream ss(line);
 	ss >> color;
-
-	//make sure the color is valid
 	assert(color == 'b' || color == 'r');
 }
 
