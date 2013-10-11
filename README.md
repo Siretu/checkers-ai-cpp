@@ -10,10 +10,10 @@ make. A heuristic function is utilized for assigning values to states generated 
 is red. Player 1 tries to maximize the heuristic function while player 2 tries to minimize it. The heuristic evaluates a state
 where player 1 loses as -infinity while it evaluates a state where player 2 loses as +infinity. 
 There are four instances in which a terminal state can occur: 
-  - 1 Red's (R) pieces are reduced to 0.
-  - 2 Black's (B) pieces are reduced to 0.
-  - 3 Red has no available moves left.
-  - 4 Black has no available moves left.
+  - 1. Red's (R) pieces are reduced to 0.
+  - 2. Black's (B) pieces are reduced to 0.
+  - 3. Red has no available moves left.
+  - 4. Black has no available moves left.
   
 
 What modes of play does it feature?
@@ -42,7 +42,7 @@ since the escape sequences may also be printed in the IDE's console.
 Where is it available?
 ============
 The executable is available to download here: 
-http://www.mediafire.com/download/05c4dyng6425hiq/checkersai.exe
+http://www.mediafire.com/download/ftg19vgd8ezawdp/checkersai.exe
 
 Note: it is compiled with cygwin for windows!
 Please read the above modes of play to load a text file into the game and for general information about the game.
