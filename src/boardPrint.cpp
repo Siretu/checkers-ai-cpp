@@ -1,7 +1,6 @@
 /*
  * boardPrint.cpp
  *
- *  Created on: Aug 22, 2013
  *      Author: Harrison
  */
 

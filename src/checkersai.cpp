@@ -1,9 +1,6 @@
 //============================================================================
 // Name        : checkersai.cpp
 // Author      : Harrison Zhao
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
 //============================================================================
 
 #define NDEBUG

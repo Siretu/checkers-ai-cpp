@@ -1,7 +1,6 @@
 /*
  * game.cpp
  *
- *  Created on: Aug 27, 2013
  *      Author: Harrison
  */
 

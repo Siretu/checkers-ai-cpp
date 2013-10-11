@@ -1,7 +1,6 @@
 /*
  * board.h
  *
- *  Created on: Aug 15, 2013
  *      Author: Harrison
  */
 

@@ -1,7 +1,6 @@
 /*
  * board.cpp
  *
- *  Created on: Aug 15, 2013
  *      Author: Harrison
  */
 
