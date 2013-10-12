@@ -122,49 +122,42 @@ void board::modifyBoard(ifstream& fin)
 }
 
 //gives a small bonus to losing player for being in a double corner
-int board::inCorner(char losing)
-{
-	int i = 0;
-	if (tolower(arr[0][0]) == losing || tolower(arr[1][0]) == losing)
-		i += 3;
-	if (tolower(arr[6][3]) == losing || tolower(arr[7][3]) == losing)
-		i += 3;
-	return i;
-}
-
-//gives a small bonus to winning player for being on a diagonal
+//gives a smaller bonus to winning player for being on a diagonal close to the losing piece's corner
 //will help winning player force losing player out of a corner
-int board::onDiagonal(char winning)
+int board::cornerDiagonal(char losing, char winning)
 {
 	int c = 0;
-	for (int j = 0; j != 4; ++j)
+	if (tolower(arr[0][0]) == losing || tolower(arr[1][0]) == losing)
 	{
-		int i = 0;
-		if (j == 0)
-		{
-			for (; i != 3; ++i)
-				if (tolower(arr[i][j]) == winning)
-					++c;
-		}
-		else if (j == 1)
-		{
-			for (i = 1; i != 5; ++i)
-				if (tolower(arr[i][j]) == winning)
-					++c;
-		}
-		else if (j == 2)
-		{
-			for (i = 3; i != 8; ++i)
-				if (tolower(arr[i][j]) == winning)
-					++c;
-		}
-		else
-		{
-			for (i = 5; i != 7; ++i)
-				if (tolower(arr[i][j]) == winning)
-					++c;
-		}
+		c += 9;
+		if (tolower(arr[0][0]) == winning)
+			c -= 3;
+		if (tolower(arr[1][0]) == winning)
+			c -= 3;
+		if (tolower(arr[1][1]) == winning)
+			c -= 1;
+		if (tolower(arr[2][0]) == winning)
+			c -= 1;
+		if (tolower(arr[2][1]) == winning)
+			c -= 1;
+		if (tolower(arr[3][1]) == winning)
+			c -= 1;
+	}
+	if (tolower(arr[6][3]) == losing || tolower(arr[7][3]) == losing)
+	{
+		c += 9;
+		if (tolower(arr[4][2]) == winning)
+			c -= 1;
+		if (tolower(arr[5][2]) == winning)
+			c -= 1;
+		if (tolower(arr[5][3]) == winning)
+			c -= 1;
+		if (tolower(arr[6][2]) == winning)
+			c -= 1;
+		if (tolower(arr[6][3]) == winning)
+			c -= 3;
+		if (tolower(arr[7][3]) == winning)
+			c -= 3;
 	}
 	return c;
 }
-

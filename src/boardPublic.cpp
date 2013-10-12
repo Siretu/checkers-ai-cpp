@@ -230,17 +230,9 @@ int board::evaluate()
 			}
 		}
 	if (c > 0 && a2 >= -8)
-	{
-		d -= inCorner('r');
-		if (d < 0)
-			d += onDiagonal('b');
- 	}
+		d -= cornerDiagonal('r', 'b');
 	else if (c < 0 && a1 <= 8)
-	{
-		d += inCorner('b');
-		if (d > 0)
-			d -= onDiagonal('r');
-	}
+		d += cornerDiagonal('b', 'r');
 	a1 *= 100000000;
 	a2 *= 100000000;
 	b *= 1000000;

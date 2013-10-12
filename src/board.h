@@ -135,17 +135,12 @@ class board
 	//found in board.cpp
 	void modifyBoard(std::ifstream&);
 
-	//checks corners near end game
+	//checks double corners and diagonals near end game
 	//gives points for occupying a double corner for losing player
+	//winning player gets points for occupying a diagonal near losing player's corner
 	//found in board.cpp
 	//called by evaluate() in boardPublic.cpp
-	int inCorner(char losing);
-
-	//checkers diagonals near endgame, gives more points for occupying diagonal
-	//if other player is in corner
-	//found in board.cpp
-	//called by evaluate() in boardPublic.cpp
-	int onDiagonal(char winning);
+	int cornerDiagonal(char, char);
 
 	//functions for jumps: found in boardJumps.cpp
 	//---------------------------------------------------------------------------------
