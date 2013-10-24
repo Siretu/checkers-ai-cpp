@@ -22,13 +22,13 @@ The game features player vs computer and computer vs computer modes. The compute
 to decide it's move. There is no time limit for a human player to determine his or her move. The game can also be loaded from
 a file. The designated input file must look something like:]
 
-    e e b e
+     e e b e
     e e e e
-    e e r e
+     e e r e
     e e e e
-    e R e B
+     e R e B
     e e e e
-    e e e e
+     e e e e
     e e e e
     r
 
