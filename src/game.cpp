@@ -231,7 +231,7 @@ int game::alphabeta(sptr<board>& b, int depth, int alpha, int beta)
 			}
 
 			//cut off
-			if (alpha >= beta && depth < maxdepth - 5)
+			if (alpha >= beta && depth < maxdepth)
 				return alpha;
 		}
 
