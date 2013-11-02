@@ -116,6 +116,7 @@ void board::modifyBoard(ifstream& fin)
 	remove_carriage_return(line);
 	stringstream ss(line);
 	ss >> color;
+	color = tolower(color);
 	assert(color == 'b' || color == 'r');
 }
 
