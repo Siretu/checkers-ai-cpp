@@ -48,7 +48,8 @@ int board::reverse(int i)
 void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
     arr[xs][ys] = 'e';
-    int key = createkey(xs, ys, xj, yj, xe, ye);
+    //+1 to each because 0 will mess up the keys and reverse for an edge case such as xs=0 ys =0
+    int key = createkey(xs+1, ys+1, xj+1, yj+1, xe+1, ye+1);
     jump* jcheck = jp;
     while (jcheck != NULL)
     {
