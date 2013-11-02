@@ -15,21 +15,48 @@ using std::endl;
 using std::list;
 using std::toupper;
 
+//create a "code" for each jump, used to prevent repetitions
+inline int board::createkey(int xs, int ys, int xj, int yj, int xe, int ye)
+{
+    return ye + xe*10 + yj*100 + xj*1000 + ys*10000 + xs*100000;
+}
 
-//creates a new jump given the start position (xs, ys), jumped over position (xj, yj), and end position (xe, ye)
+//reverses a jump's key
+//so 233444 will be broken up into 23 34 44 and reorganized to become 444332
+//this is to prevent any repeated jumps
+int board::reverse(int i)
+{
+    int num = 0;
+    while (i/100 > 0)
+    {
+        num += i % 100;
+        num *= 100;
+        i /= 100;
+    }
+    num += i;
+    return num;
+
+}
+
+//creates a new jump given the start position (xs, ys),
+//jumped over position (xj, yj), and end position (xe, ye)
 //also takes a jump pointer jp which represents the previous jump
-//deletes the character jumped over temporarily
 //it will be added in when the jumps are connected into a move
-//and the move is undone
-//the end space is not replaced because bugs will occur if it is
 //instead the character is passed
 //recursively call jumpAvailable, using the new end position
 //keep track of what piece is currently making the jumps by passing it as parameter
 void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int yj, int xe, int ye, jump* jp)
 {
-	jump* j = new jump(c, arr[xj][yj], xs, ys, xj, yj, xe, ye, jp);
-	arr[xj][yj] = 'e';
-	arr[xs][ys] = 'e';
+    arr[xs][ys] = 'e';
+    int key = createkey(xs, ys, xj, yj, xe, ye);
+    jump* jcheck = jp;
+    while (jcheck != NULL)
+    {
+        if (key == jcheck->key || key == reverse(jcheck->key))
+            return;
+        jcheck = jcheck->prev;
+    }
+	jump* j = new jump(c, arr[xj][yj], xs, ys, xj, yj, xe, ye, jp, key);
 	if (jp != NULL)
 		jp->noNext = false;
 	jlist.push_front(j);
@@ -37,15 +64,12 @@ void board::createJump(list<jump*>& jlist, char c, int xs, int ys, int xj, int y
 }
 
 //iterate through the list of jumps
-//create new moves when appropriate
-//add all the appropriate jumps to the move's list of jumps
-//reverse ordering, so that last jump is at the end of the list
-//for each jump added, set visited as true
-//visited is only needed for the last jump though
+//create new moves only when encountering the last jump
+//add all the appropriate jumps to the move's list of jumps via backtracking
 //increment the jump's numTimes
 //repeat the loop until the first jump was added to the move's jump list
 //add the start point to the move's start position and to command
-//undoes each jump
+//undoes each jump, so the starting character is where it began before getting erased
 //replaces the 'e's with original characters
 void board::createJumpMove(list<jump*>& jlist)
 {
@@ -54,7 +78,7 @@ void board::createJumpMove(list<jump*>& jlist)
 		list<jump*>::const_iterator it = jlist.begin();
 		for (; it != jlist.end(); ++it)
 		{
-			if ((*it)->noNext && (*it)->visited == false)
+			if ((*it)->noNext)
 			{
 				move* m = new move((*it)->jumpingPiece, -1, -1, -1, -1);
 				jump* jp = (*it);
@@ -62,7 +86,6 @@ void board::createJumpMove(list<jump*>& jlist)
 				{
 					m->jpoints.push_front(jp);
 					++jp->numTimes;
-					jp->visited = true;
 					jp = jp->prev;
 				}
 				m->xi = m->jpoints.front()->xs;
@@ -86,7 +109,7 @@ void board::createJumpMove(list<jump*>& jlist)
 	}
 }
 
-//compiled the code for jumping in all four directions
+//checking for jumping in all four directions
 //(x,y) is the start point
 void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NULL)
 {
@@ -126,66 +149,11 @@ void board::jumpAvailable(list<jump*>& jlist, char c, int x, int y, jump* jp= NU
 	}
 }
 
-//checks top right jump
-void board::checkJumpTR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-{
-	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
-	{
-		//even x
-		if ((x % 2 == 0) && (jumpConditions(x-1, y+1, x-2, y+1)))
-			createJump(jlist, arr[x][y], x, y, x-1, y+1, x-2, y+1, jp);
-		//odd x
-		else if ((x % 2 != 0) && jumpConditions(x-1, y, x-2, y+1))
-			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y+1, jp);
-	}
-}
-
-//checks top left jump
-void board::checkJumpTL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-{
-	if (tolower(arr[x][y]) == 'r' || arr[x][y] == 'B')
-	{
-		//even x
-		if ((x % 2 == 0) && (jumpConditions(x-1, y, x-2, y-1)))
-			createJump(jlist, arr[x][y], x, y, x-1, y, x-2, y-1, jp);
-		//odd x
-		else if ((x % 2 != 0) && jumpConditions(x-1, y-1, x-2, y-1))
-			createJump(jlist, arr[x][y], x, y, x-1, y-1, x-2, y-1, jp);
-	}
-}
-
-//checks lower right jump
-void board::checkJumpLR(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-{
-	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
-	{
-		//even x
-		if ((x % 2 == 0) && (jumpConditions(x+1, y+1, x+2, y+1)))
-			createJump(jlist, arr[x][y], x, y, x+1, y+1, x+2, y+1, jp);
-		//odd x
-		else if ((x % 2 != 0) && jumpConditions(x+1, y, x+2, y+1))
-			createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y+1, jp);
-	}
-}
-
-//checks lower left jump
-void board::checkJumpLL(list<jump*>& jlist, int x, int y, jump* jp = NULL)
-{
-	if (tolower(arr[x][y]) == 'b' || arr[x][y] == 'R')
-	{
-		//even x
-		if ((x % 2 == 0) && (jumpConditions(x+1, y, x+2, y-1)))
-			createJump(jlist, arr[x][y], x, y, x+1, y, x+2, y-1, jp);
-		//odd x
-		else if ((x % 2 != 0) && jumpConditions(x+1, y-1, x+2, y-1))
-			createJump(jlist, arr[x][y], x, y, x+1, y-1, x+2, y-1, jp);
-	}
-}
-
 //called by movesAvailable in board.h
-//automatically clears all moves
+//clears all moves
 //if the piece belongs to the current turn's color
 //check it for jumps
+//then create jumping moves once the search is finished
 bool board::jumpsAvailable()
 {
 	while (!mlist.empty())
@@ -193,31 +161,20 @@ bool board::jumpsAvailable()
 		delete mlist.front();
 		mlist.pop_front();
 	}
-	list<jump*> jlist;
 	for (int i = 0; i!= 8; ++i)
 	{
 		for (int j = 0; j != 4; ++j)
 		{
 			if (arr[i][j] == color || arr[i][j] == toupper(color))
 			{
-				//check jumps in each of the four directions
-				//then create jumping moves once the search is finished
-				//this will enable branching on the first jump, if necessary
-				//TR - top right, TL - top left, LR - lower right, LL - lower left
-				checkJumpTR(jlist, i, j, NULL);
-				createJumpMove(jlist);
-				checkJumpTL(jlist, i, j, NULL);
-				createJumpMove(jlist);
-				checkJumpLR(jlist, i, j, NULL);
-				createJumpMove(jlist);
-				checkJumpLL(jlist, i, j, NULL);
+                list<jump*> jlist;
+                jumpAvailable(jlist, arr[i][j], i, j, NULL);
 				createJumpMove(jlist);
 			}
 		}
 	}
 
-	//if no jumping moves were added, return false
-	//else return true
+	//if no jumping moves were added, return false, else return true
 	if (mlist.empty())
 		return false;
 	return true;

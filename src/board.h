@@ -15,17 +15,7 @@
 
 class jump
 {
-	//unique previous jump
-	//example:
-	//like in a diamond shape
-	//			4
-	//		3
-	//	2		2'
-	//		1
-	//  1->2'->3->4 is a multiple jump
-	// 	1->2 ->3->4 is another multiple jump
-	// 	3->4 will be created twice, once for each path taken
-	//	they will be exactly the same
+	//previous jump
 	jump* prev;
 
 	//the piece jumping
@@ -38,9 +28,6 @@ class jump
 	//increment every time jump is concatenated to a move
 	//prevents double freeing of memory
 	int numTimes;
-
-	//prevents moves from getting created twice
-	bool visited;
 
 	//character jumped over
 	char c;
@@ -57,18 +44,18 @@ class jump
 	int xend;
 	int yend;
 
+    int key;
+    
 	//constructor for each data value
-	jump(char jpingp, char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p):
-		prev(p), jumpingPiece(jpingp), noNext(true), numTimes(0), visited(false), c(piece), xs(xs), ys(ys),
-		 x(xc), y(yc), xend(xe), yend(ye){}
+	jump(char jpingp, char piece, int xs, int ys, int xc, int yc, int xe, int ye, jump* p, int k):
+		prev(p), jumpingPiece(jpingp), noNext(true), numTimes(0), c(piece), xs(xs), ys(ys),
+		 x(xc), y(yc), xend(xe), yend(ye), key(k){}
 
 	//---------------------------------------------------------------------------------
 	//friend classes:
 	//---------------------------------------------------------------------------------
-
 	//pointers to jump are deleted in move's destructor
 	friend class move;
-
 	//board's members create jumps
 	friend class board;
 };
@@ -103,10 +90,8 @@ class move
 	//---------------------------------------------------------------------------------
 	//friend classes:
 	//---------------------------------------------------------------------------------
-
 	//board creates moves and it accesses many of move's members
 	friend class board;
-
 	//move's member: command is accessed in game::outputMessage()
 	friend class game;
 };
@@ -126,87 +111,115 @@ class board
 	//default initialized to false since it's a static array
 	static bool isComputer[2];
 
-	//reset the board after game over
-	//found in board.cpp
-	//called by startup, which is in boardPublic.cpp
-	void reset();
-
-	//create a board from an input file:
-	//found in board.cpp
-	void modifyBoard(std::ifstream&);
-
-	//checks double corners and diagonals near end game
-	//gives points for occupying a double corner for losing player
-	//winning player gets points for occupying a diagonal near losing player's corner
-	//found in board.cpp
-	//called by evaluate() in boardPublic.cpp
-	int cornerDiagonal(char, char);
-
-	//functions for jumps: found in boardJumps.cpp
+    //---------------------------------------------------------------------------------
+	//functions for board creation, found in board.cpp:
 	//---------------------------------------------------------------------------------
-	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
-
-	void createJumpMove(std::list<jump*>&);
-
-	void jumpAvailable(std::list<jump*>&, char c, int, int, jump*);
-
-	//checks entire board for jumps and lists any moves with jumps, if there are any
-	bool jumpsAvailable();
-
-	bool jumpConditions(int, int, int, int);
-
-	void checkJumpTR(std::list<jump*>&, int, int, jump*);
-
-	void checkJumpTL(std::list<jump*>&, int, int, jump*);
-
-	void checkJumpLR(std::list<jump*>&, int, int, jump*);
-
-	void checkJumpLL(std::list<jump*>&, int, int, jump*);
-
+	//1: constructor for initializing an initial board
+	//2: destructor deallocates memory for all the moves in mlist
+	//3: copy constructor
+	//   copies over all data values except the move list
+	//   useful for creating new boards for each move in alpha-beta search
+	//4: changeTurn(), called after a move is made
+	//   called in game.cpp by alphabeta
+	//   called by makeMove, which is found in boardPublic.cpp
+    //   is inlined
+	//5: converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
+	//   called in inputCommand in boardPrint.cpp
+	//6: create a list of moves by calling this
+	//   is called each time a new board gets created after a move is made
+	//   called by evaluate, in boardPublic.cpp
+    //   is inlined
+	board();
+	~board();
+	board(const board&);
+    
+	void changeTurn()
+    {
+        if (color == 'r')
+            color = 'b';
+        else
+            color = 'r';
+    }
+    
+	static void convertCommand(const std::string&);
+    
+	bool terminalTest()
+    {
+        if (!movesAvailable())
+            return true;
+        return false;
+    }
+    
 	//---------------------------------------------------------------------------------
-	//functions for regular moves, found in boardMoves.cpp
-	//---------------------------------------------------------------------------------
-	void checkNeighbors(int&, int&);
-
-	void createMove(const int&, const int&, int, int);
-
-	bool listMoves();
-	//---------------------------------------------------------------------------------
-	//general functions used for moves and jumps
+	//general functions used for moves and jumps, found in board.cpp
 	//---------------------------------------------------------------------------------
 	//called in the terminalTest function
 	//if there are any jumps, they are added to move list
 	//else if there are any moves, they are added to the move list
 	//if there are no jumps or moves available, it returns false
+    //is inlined
 	bool movesAvailable()
-	{
-		if (jumpsAvailable())
-			return true;
-		if (listMoves())
-			return true;
-		return false;
-	}
-
+    {
+        if (jumpsAvailable())
+            return true;
+        if (listMoves())
+            return true;
+        return false;
+    }
+    
 	//if a red piece 'r' reaches the red side's end, it becomes a red king 'R'
 	//if a black piece 'b' reaches the black side's end, it becomes a black king 'B'
 	//called at the end of the makeMove function, which is found in boardPublic.cpp
+    //is inlined
 	void handleKinging(const int& x, const int& y)
-	{
-		if (x == 0 && arr[x][y] == 'r')
-			arr[x][y] = 'R';
-		if (x == 7 && arr[x][y] == 'b')
-			arr[x][y] = 'B';
-	}
-
+    {
+        if (x == 0 && arr[x][y] == 'r')
+            arr[x][y] = 'R';
+        if (x == 7 && arr[x][y] == 'b')
+            arr[x][y] = 'B';
+    }
+    
 	//returns true if the position arr[i][j] is a valid position on the checker board
 	//called by jumpConditions, which is found in boardJumps.cpp
 	//called by createMove, which is found in boardMoves.cpp
+    //is inlined
 	bool isValidPos(int i, int j)
-	{
-		if (i >= 0 && i < 8 && j >= 0 && j < 4)
-			return true;
-		else return false;
-	}
+    {
+        if (i >= 0 && i < 8 && j >= 0 && j < 4)
+            return true;
+        else return false;
+    }
+    
+	//reset the board after game over
+	//called by startup, which is in boardPublic.cpp
+	void reset();
+
+	//create a board from an input file:
+	void modifyBoard(std::ifstream&);
+
+    //function for fixing strings obtained via getline
+    //eliminate the \r character in a string or the \n character
+    //called by modifyBoard in board.cpp
+    void remove_carriage_return(std::string&);
+
+    //---------------------------------------------------------------------------------
+	//functions for jumps: found in boardJumps.cpp
+	//---------------------------------------------------------------------------------
+    //createkey is inlined
+    int createkey(int, int, int, int, int, int);
+    int reverse(int);
+	void createJump(std::list<jump*>&, char, int, int, int, int, int, int, jump*);
+	void createJumpMove(std::list<jump*>&);
+	void jumpAvailable(std::list<jump*>&, char c, int, int, jump*);
+	bool jumpsAvailable();
+	bool jumpConditions(int, int, int, int);
+
+	//---------------------------------------------------------------------------------
+	//functions for regular moves, found in boardMoves.cpp
+	//---------------------------------------------------------------------------------
+	void checkNeighbors(int&, int&);
+	void createMove(const int&, const int&, int, int);
+	bool listMoves();
 
 	//---------------------------------------------------------------------------------
 	//functions for printing, found in boardPrint.cpp
@@ -219,12 +232,7 @@ class board
 	//used for printing out moves, converting the y coordinate in the matrix
 	//to the coordinate on the expanded 8x8 board
 	//called in printMoves in boardPrint.cpp
-	int convertY(const int& x, const int& y)
-	{
-		 if (x % 2 == 0)
-			 return (2*y + 1);
-		 else return (2*y);
-	}
+	int convertY(const int& x, const int& y);
 
 	//prints out a row of the checkers board
 	//called by boardPrint in boardPublic.cpp
@@ -236,66 +244,30 @@ class board
 
 	//modifies who is a computer, called by startup
 	static void whoComputer();
-
+    
 //-------------------------------------------------------------------------------------
-// FUNCTIONS AND DATA MEMBERS UTILIZED DIRECTLY IN GAME.H:
+// FUNCTIONS AND MEMBERS UTILIZED DIRECTLY IN GAME.H:
 //-------------------------------------------------------------------------------------
-
 	//timer for the computer
 	static int timeLimit;
 
 	//list of moves for the board:
 	std::list<move*> mlist;
-
-	//---------------------------------------------------------------------------------
-	//functions for board creation, found in board.cpp:
-	//---------------------------------------------------------------------------------
-	//1: constructor for initializing an initial board
-	//2: destructor deallocates memory for all the moves in mlist
-	//3: copy constructor
-	//   copies over all data values except the move list
-	//   useful for creating new boards for each move in alpha-beta search
-	//4: changeTurn(), called after a move is made
-	//   called in game.cpp by alphabeta
-	//   called by makeMove, which is found in boardPublic.cpp
-	//5: converts a command stored in the form 2 3 3 2 -1 to (2,3) -> (3, 2)
-	//   called in inputCommand in boardPrint.cpp
-	//6: create a list of moves by calling this
-	//   should be called each time a new board gets created after a move is made
-	//   called by evaluate, in boardPublic.cpp
-	board();
-	~board();
-	board(const board&);
-
-	void changeTurn()
-	{
-		if (color == 'r')
-			color = 'b';
-		else
-			color = 'r';
-	}
-
-	static void convertCommand(const std::string&);
-
-	bool terminalTest()
-	{
-		if (!movesAvailable())
-			return true;
-		return false;
-	}
+    
 	//---------------------------------------------------------------------------------
 	//functions found in boardPublic.cpp, functions called in game.cpp
 	//---------------------------------------------------------------------------------
 	//determines whether or not the current turn is a computer's turn
 	//called to run alpha-beta search if necessary
+    //is inlined
 	bool isComputerTurn()
-	{
-		if (color == 'b' && isComputer[0])
-			return true;
-		if (color == 'r' && isComputer[1])
-			return true;
-		return false;
-	}
+    {
+        if (color == 'b' && isComputer[0])
+            return true;
+        if (color == 'r' && isComputer[1])
+            return true;
+        return false;
+    }
 
 	//prints out directions and available moves
 	//need to add computer moves to it
@@ -315,7 +287,13 @@ class board
 
 	//reverses a move
 	void undoMove(move*);
-
+    
+	//checks double corners and diagonals near end game
+	//gives points for occupying a double corner for losing player
+	//winning player gets points for occupying a diagonal near losing player's corner
+	//called by evaluate() in boardPublic.cpp
+	int cornerDiagonal(char, char);
+    
 	//Evaluation function, need to do
 	//will be implemented in alpha-beta search
 	int evaluate();
@@ -324,27 +302,19 @@ class board
 	void startup();
 
 	//gets the current color's turn
-	char getTurn() {return color;}
+    //is inlined
+	char getTurn()
+    {
+        return color;
+    }
 
 	//---------------------------------------------------------------------------------
 	//friend classes:
 	//---------------------------------------------------------------------------------
 	//game accesses many of move's functions (see above divider)
 	friend class game;
-
 	//sptr is a smart pointer class that automatically manages memory for boards created on the heap
 	template <class T> friend class sptr;
 };
-
-//function for fixing strings obtained via getline
-//called by modifyBoard in board.cpp
-//eliminate the \r character in a string or the \n character
-inline void remove_carriage_return(std::string& line)
-{
-    if (*line.rbegin() == '\r' || *line.rbegin() == '\n')
-    	line.erase(line.length() - 1);
-}
-
-
 
 #endif /* BOARD_H_ */

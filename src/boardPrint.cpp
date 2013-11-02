@@ -44,6 +44,15 @@ void board::convert(const int& x, const int& y, string& s)
 	 s += ' ';
 }
 
+//used for printing out moves, converting the y coordinate in the matrix
+//to the coordinate on the expanded 8x8 board
+inline int board::convertY(const int& x, const int& y)
+{
+    if (x % 2 == 0)
+        return (2*y + 1);
+    else return (2*y);
+}
+
 //prints a line of the board
 //that does not contain any pieces
 //i.e something like: XXX|   |XXX|   |XXX|   |XXX|

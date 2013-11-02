@@ -22,33 +22,6 @@ bool board::isComputer[2];
 
 int board::timeLimit = 0;
 
-//public constructors
-//---------------------------------------------------------------------------------
-board::board()
-{
-	//initializes everything for the checker board
-	reset();
-}
-
-//destructor deallocates memory for all the moves in mlist
-board::~board()
-{
-	while (!mlist.empty())
-	{
-		delete mlist.front();
-		mlist.pop_front();
-	}
-}
-
-//copy constructor
-//copies over all data values except the move list
-//useful for creating new boards for each move in alpha-beta search
-board::board(const board& b): color(b.color)
-{
-	for (int i = 0; i != 8; ++i)
-		for (int j = 0; j != 4; ++j)
-			arr[i][j] = b.arr[i][j];
-}
 
 //frees the memory allocated on the heap for each jump pointer
 //avoids double freeing of memory by keeping track of the
@@ -71,6 +44,31 @@ move::~move()
 		if ((*it)->numTimes == 0)
 			delete (*it);
 	}
+}
+
+//initializes everything for the checker board
+board::board()
+{
+	reset();
+}
+
+//destructor deallocates memory for all the moves in mlist
+board::~board()
+{
+	while (!mlist.empty())
+	{
+		delete mlist.front();
+		mlist.pop_front();
+	}
+}
+
+//copy constructor: copies over all data values except the move list
+//useful for creating new boards for each move in alpha-beta search
+board::board(const board& b): color(b.color)
+{
+	for (int i = 0; i != 8; ++i)
+		for (int j = 0; j != 4; ++j)
+			arr[i][j] = b.arr[i][j];
 }
 
 //resets the board, called by printEBoard in boardPublic.cpp
@@ -121,43 +119,9 @@ void board::modifyBoard(ifstream& fin)
 	assert(color == 'b' || color == 'r');
 }
 
-//gives a small bonus to losing player for being in a double corner
-//gives a smaller bonus to winning player for being on a diagonal close to the losing piece's corner
-//will help winning player force losing player out of a corner
-int board::cornerDiagonal(char losing, char winning)
+//eliminate the \r character in a string or the \n character
+inline void board::remove_carriage_return(std::string& line)
 {
-	int c = 0;
-	if (tolower(arr[0][0]) == losing || tolower(arr[1][0]) == losing)
-	{
-		c += 9;
-		if (tolower(arr[0][0]) == winning)
-			c -= 3;
-		if (tolower(arr[1][0]) == winning)
-			c -= 3;
-		if (tolower(arr[1][1]) == winning)
-			c -= 1;
-		if (tolower(arr[2][0]) == winning)
-			c -= 1;
-		if (tolower(arr[2][1]) == winning)
-			c -= 1;
-		if (tolower(arr[3][1]) == winning)
-			c -= 1;
-	}
-	if (tolower(arr[6][3]) == losing || tolower(arr[7][3]) == losing)
-	{
-		c += 9;
-		if (tolower(arr[4][2]) == winning)
-			c -= 1;
-		if (tolower(arr[5][2]) == winning)
-			c -= 1;
-		if (tolower(arr[5][3]) == winning)
-			c -= 1;
-		if (tolower(arr[6][2]) == winning)
-			c -= 1;
-		if (tolower(arr[6][3]) == winning)
-			c -= 3;
-		if (tolower(arr[7][3]) == winning)
-			c -= 3;
-	}
-	return c;
+    if (*line.rbegin() == '\r' || *line.rbegin() == '\n')
+    	line.erase(line.length() - 1);
 }

@@ -157,18 +157,14 @@ void board::makeMove(move* m)
 	}
 
 	//save the piece
-	char c = arr[m->xi][m->yi];
-
-	//replace the start position with an empty space
-	arr[m->xi][m->yi] = 'e';
-
+    //replace the start position with an empty space
 	//add back in the saved piece at the end point
+	char c = arr[m->xi][m->yi];
+	arr[m->xi][m->yi] = 'e';
 	arr[m->xf][m->yf] = c;
 
-	//check if the piece should be changed to a king
+	//check if the piece should be changed to a king and change player's turn
 	handleKinging(m->xf, m->yf);
-
-	//change player's turn
 	changeTurn();
 }
 
@@ -190,6 +186,47 @@ void board::undoMove(move* m)
 	}
 	arr[m->xf][m->yf] = 'e';
 	arr[m->xi][m->yi] = m->mP;
+}
+
+//gives a small bonus to losing player for being in a double corner
+//gives a smaller bonus to winning player for being on a diagonal close to the losing piece's corner
+//will help winning player force losing player out of a corner
+int board::cornerDiagonal(char losing, char winning)
+{
+	int c = 0;
+	if (tolower(arr[0][0]) == losing || tolower(arr[1][0]) == losing)
+	{
+		c += 9;
+		if (tolower(arr[0][0]) == winning)
+			c -= 3;
+		if (tolower(arr[1][0]) == winning)
+			c -= 3;
+		if (tolower(arr[1][1]) == winning)
+			c -= 1;
+		if (tolower(arr[2][0]) == winning)
+			c -= 1;
+		if (tolower(arr[2][1]) == winning)
+			c -= 1;
+		if (tolower(arr[3][1]) == winning)
+			c -= 1;
+	}
+	if (tolower(arr[6][3]) == losing || tolower(arr[7][3]) == losing)
+	{
+		c += 9;
+		if (tolower(arr[4][2]) == winning)
+			c -= 1;
+		if (tolower(arr[5][2]) == winning)
+			c -= 1;
+		if (tolower(arr[5][3]) == winning)
+			c -= 1;
+		if (tolower(arr[6][2]) == winning)
+			c -= 1;
+		if (tolower(arr[6][3]) == winning)
+			c -= 3;
+		if (tolower(arr[7][3]) == winning)
+			c -= 3;
+	}
+	return c;
 }
 
 //black is more positive
