@@ -233,7 +233,7 @@ int board::cornerDiagonal(char losing, char winning)
 //red is more negative
 //aabbccddee
 //aa is a count of all pieces: king is worth a total of 3, regular pieces are 2 (black - red)
-//bb is measuring how close a normal piece is to becoming a king
+//bb is measuring how close a normal piece is to becoming a king, give last row a bonus
 //cc is a piece count difference
 //dd is a measurement near end game, double corners add a bonus for losing player
 //ee is pseudo-random in the case that multiple moves tie for best
@@ -246,13 +246,17 @@ int board::evaluate()
 			if (arr[i][j] == 'b')
 			{
 				a1 += 2;
-				b += i;
+				if (i == 0)
+					b += 9;
+				else b += i;
 				c += 1;
 			}
 			else if (arr[i][j] == 'r')
 			{
 				a2 -=2;
-				b -= (7 - i);
+				if (i == 7)
+					b -= 9;
+				else b -= (7 - i);
 				c -= 1;
 			}
 			else if (arr[i][j] == 'B')
