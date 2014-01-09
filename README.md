@@ -46,11 +46,3 @@ normal pieces respectively. 'e' represents empty spaces. The 9th line of the inp
 Red pieces get printed in magenta and black pieces get printed in cyan. 
 Note: Run the program's executable in terminal instead of in an IDE (such as Eclipse's) console
 since the escape sequences may also be printed in the IDE's console.
-
-Where is it available?
-============
-The executable is available to download here: 
-http://www.mediafire.com/download/ftg19vgd8ezawdp/checkersai.exe
-
-Note: it is compiled with cygwin for windows!
-Please read the above modes of play to load a text file into the game and for general information about the game.
