@@ -15,6 +15,12 @@ There are four instances in which a terminal state can occur:
   - 3. Red has no available moves left.
   - 4. Black has no available moves left.
   
+What does each class do?
+============
+The board class holds a representation of the checkerboard using an 8 x 4 matrix of characters. 32 positions are needed instead of 64 positions since only half of the squares are legal game spaces. The board class also keeps track of turns, time limits, and whether or not a player is a computer. The board class has member functions that create moves, test whether or not the game has ended, print the board to screen, and modify the board. Several members of the board class are used in the game class to implement alpha-beta search. 
+The move class contains a list of jumps as well as all the data necessary to move a piece from one location to another on the board. The moves are created after all the jumps are created. The jumps are created by checking each direction for a valid piece and checking for valid jumps. Repetitions for jumps (jumping over the same square twice) are prevented by giving each jump a key and by maintaining predecessors for each jump. This key is a linear combination of its position on the board. By reversing the key (for example 123 -> 321) and maintaining pointers to previous jumps, the program can make sure a jump over a certain square is never repeated during one multiple jump.
+The game class implements alpha-beta search. It also calls the members of the board class to print the board to the screen and to start up the game. It keeps track of the current state of the game by maintaining a pointer to the current board. With the smart pointer wrapper, which automatically de-allocates dynamic memory, alpha-beta search is able to generate many game boards and not have to manually call delete on each board created. The game class also maintains the time_t values to time a computer’s turn. The main function creates a game and makes the game start.
+The evaluation function is calculated based on number and type of pieces left, how close a regular piece is to be a king, endgame positions, and a pseudorandom number. The comments for the evaluation function describe the breakdown of how it’s calculated.
 
 What modes of play does it feature?
 ============
